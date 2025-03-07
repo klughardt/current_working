@@ -42,7 +42,7 @@ resource "aws_iam_role" "mongodb_role" {
             "aws:SourceAccount": data.aws_caller_identity.current.account_id
           }
           StringLike = {
-            "aws:SourceArn": "arn:aws:ec2:${var.aws_region}:${data.aws_caller_identity.current.account_id}:*"
+            "aws:SourceArn": "arn:aws:ec2:${var.region}:${data.aws_caller_identity.current.account_id}:*"
           }
         }
       }
@@ -152,7 +152,7 @@ resource "aws_instance" "mongodb" {
         sleep 2
     done
 
-    CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.mongosecret.id} --region ${var.aws_region} --query SecretString --output text)
+    CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.mongosecret.id} --region ${var.region} --query SecretString --output text)
     DB_USERNAME=$(echo $CREDENTIALS | jq -r .username)
     DB_PASSWORD=$(echo $CREDENTIALS | jq -r .password)
 
@@ -165,7 +165,7 @@ resource "aws_instance" "mongodb" {
     BACKUP_DIR="/tmp/$BACKUP_NAME"
     S3_BUCKET="${aws_s3_bucket.backup.bucket}"
 
-    CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.mongosecret.id} --region ${var.aws_region} --query SecretString --output text)
+    CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.mongosecret.id} --region ${var.region} --query SecretString --output text)
     DB_USERNAME=$(echo $CREDENTIALS | jq -r .username)
     DB_PASSWORD=$(echo $CREDENTIALS | jq -r .password)
 
