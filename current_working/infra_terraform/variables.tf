@@ -36,6 +36,18 @@ variable "db_password" {
   default = "doNotHardCodePasswordsInPlainText"
 }
 
+variable "db_ami" {
+  default = "ami-0866a3c8686eaeeba"
+}
+
+variable "db_instance_type" {
+  default = "t2.micro"
+}
+
+variable "my_ip" {
+  default     = "127.0.0.1"
+}
+
 variable "log_retention_days" {
   type        = number
   default     = 365
