@@ -1,3 +1,7 @@
+variable "project_name" {
+  default = "workwiz"
+}
+
 variable "region" {
   description = "AWS region"
   default     = "us-east-1"
