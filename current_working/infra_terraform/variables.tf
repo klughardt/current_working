@@ -12,6 +12,10 @@ variable "secondary_region" {
   default     = "us-west-1"
 }
 
+variable "vpc_cidr" {
+  default = "172.16.0.0/16"
+}
+
 variable "cluster_name" {
   default = "wiz-exercise-cluster"
 }
