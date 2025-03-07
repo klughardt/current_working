@@ -19,10 +19,6 @@ variable "ec2_key_name" {
   default = "wiz-ssh-key"
 }
 
-variable "project_name" {
-  default = "tasky-panel"
-}
-
 variable "db_user" {
   default = "mongoadmin"
 }
