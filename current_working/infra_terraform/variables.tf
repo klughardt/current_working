@@ -7,6 +7,11 @@ variable "region" {
   default     = "us-east-1"
 }
 
+variable "secondary_region" {
+  type        = string
+  default     = "us-west-1"
+}
+
 variable "cluster_name" {
   default = "wiz-exercise-cluster"
 }
