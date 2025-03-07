@@ -11,11 +11,11 @@ jobs:
         at: ~/project
     - run:
         name: Initialize Terraform
-        working_directory: ~/project/infrastructure
+        working_directory: ~/project/current_working/infra_terra
         command: terraform init
     - run:
         name: Terraform Destroy
-        working_directory: ~/project/infrastructure
+        working_directory: ~/project/current_working/infra_terra
         command: terraform destroy -auto-approve
 
 workflows:
