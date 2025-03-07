@@ -45,11 +45,6 @@ resource "aws_s3_bucket_policy" "public_read" {
   depends_on = [aws_s3_bucket_public_access_block.backup]
 }
 
-resource "aws_s3_bucket" "backup_replication" {
-  provider = aws.secondary_region
-  bucket   = "${var.project_name}-backup-bucket-replication"
-  force_destroy = true
-}
 
 resource "aws_s3_bucket_versioning" "backup" {
   bucket = aws_s3_bucket.backup.id
@@ -58,12 +53,6 @@ resource "aws_s3_bucket_versioning" "backup" {
   }
 }
 
-resource "aws_s3_bucket_versioning" "backup_replication" {
-  provider = aws.secondary_region
-  bucket = aws_s3_bucket.backup_replication.id
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
+
 
 
