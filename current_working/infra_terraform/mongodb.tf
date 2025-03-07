@@ -75,7 +75,7 @@ resource "aws_iam_role_policy" "mongodb_policy" {
         Action = [
           "secretsmanager:GetSecretValue"
         ]
-        Resource = aws_secretsmanager_secret.mongodb_creds.arn
+        Resource = aws_secretsmanager_secret.mongosecret.arn
       },
       {
         Effect = "Allow"
@@ -94,13 +94,13 @@ resource "aws_iam_instance_profile" "mongodb_profile" {
   role = aws_iam_role.mongodb_role.name
 }
 
-resource "aws_secretsmanager_secret" "mongodb_creds" {
+resource "aws_secretsmanager_secret" "mongosecret" {
   name = "${var.project_name}-mongodb-creds"
   recovery_window_in_days = 0
 }
 
-resource "aws_secretsmanager_secret_version" "mongodb_creds" {
-  secret_id = aws_secretsmanager_secret.mongodb_creds.id
+resource "aws_secretsmanager_secret_version" "mongosecret" {
+  secret_id = aws_secretsmanager_secret.mongosecret.id
   secret_string = jsonencode({
     username = var.db_username
     password = var.db_password
@@ -152,7 +152,7 @@ resource "aws_instance" "mongodb" {
         sleep 2
     done
 
-    CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.mongodb_creds.id} --region ${var.aws_region} --query SecretString --output text)
+    CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.mongosecret.id} --region ${var.aws_region} --query SecretString --output text)
     DB_USERNAME=$(echo $CREDENTIALS | jq -r .username)
     DB_PASSWORD=$(echo $CREDENTIALS | jq -r .password)
 
@@ -165,7 +165,7 @@ resource "aws_instance" "mongodb" {
     BACKUP_DIR="/tmp/$BACKUP_NAME"
     S3_BUCKET="${aws_s3_bucket.backup.bucket}"
 
-    CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.mongodb_creds.id} --region ${var.aws_region} --query SecretString --output text)
+    CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.mongosecret.id} --region ${var.aws_region} --query SecretString --output text)
     DB_USERNAME=$(echo $CREDENTIALS | jq -r .username)
     DB_PASSWORD=$(echo $CREDENTIALS | jq -r .password)
 
