@@ -43,11 +43,11 @@ jobs:
         fi 
     - run:
         name: Initialize Terraform
-        working_directory: ~/project/infrastructure
+        working_directory: ~/project/current_working/infra_terraform
         command: terraform init
     - run:
         name: Terraform Plan
-        working_directory: ~/project/infrastructure
+        working_directory: ~/project/current_working/infra_terraform
         command: terraform plan
 
   terraform_apply:
@@ -65,11 +65,11 @@ jobs:
         fi 
     - run:
         name: Initialize Terraform
-        working_directory: ~/project/infrastructure
+        working_directory: ~/project/current_working/infra_terraform
         command: terraform init
     - run:
         name: Terraform Apply
-        working_directory: ~/project/infrastructure
+        working_directory: ~/project/current_working/infra_terraform
         command: terraform apply -auto-approve
 
 workflows:
