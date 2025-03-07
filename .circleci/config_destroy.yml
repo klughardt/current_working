@@ -1,0 +1,25 @@
+version: 2.1
+
+jobs:
+
+      terraform-destroy:
+            docker:
+                - image: hashicorp/terraform:light
+            steps:
+                - checkout
+                - attach_workspace:
+                        at: ~/project
+                - run:
+                        name: Initialize Terraform
+                        working_directory: ~/project/infrastructure
+                        command: terraform init
+                - run:
+                        name: Terraform Destroy
+                        working_directory: ~/project/infrastructure
+                        command: terraform destroy -auto-approve
+
+workflows:
+      version: 2
+      build_and_deploy:
+            jobs:
+                - terraform-destroy

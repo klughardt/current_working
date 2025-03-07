@@ -1,5 +1,15 @@
+terraform {
+  backend "s3" {
+    bucket         = "tf-state-workwiz"
+    key            = "state/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "tf-state-workwiz-locktable"
+  } 
+}
+
 provider "aws" {
-  region = "eu-central-1"
+  region = "us-east-1"
 }
 
 data "aws_eks_cluster" "cluster" {
@@ -13,7 +23,7 @@ data "aws_eks_cluster_auth" "cluster" {
 data "aws_availability_zones" "available" {}
 
 locals {
-  cluster_name = "learnk8s"
+  cluster_name = "workwiz"
 }
 
 provider "kubernetes" {
@@ -40,7 +50,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.9.0"
 
-  name                 = "k8s-vpc"
+  name                 = "workwiz-vpc"
   cidr                 = "172.16.0.0/16"
   azs                  = data.aws_availability_zones.available.names
   private_subnets      = ["172.16.1.0/24", "172.16.2.0/24", "172.16.3.0/24"]
