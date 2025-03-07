@@ -28,8 +28,12 @@ variable "ec2_key_name" {
   default = "wiz-ssh-key"
 }
 
-variable "db_user" {
+variable "db_username" {
   default = "mongoadmin"
+}
+
+variable "db_password" {
+  default = "doNotHardCodePasswordsInPlainText"
 }
 
 variable "log_retention_days" {
