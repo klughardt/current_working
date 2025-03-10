@@ -13,7 +13,6 @@ WORKDIR /app
 COPY --from=build  /go/src/tasky/tasky .
 COPY --from=build  /go/src/tasky/assets ./assets
 ADD wizexercise.txt .
-ADD .env .
 EXPOSE 8080
 ENTRYPOINT ["/app/tasky"]
 
