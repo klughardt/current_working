@@ -82,10 +82,9 @@ jobs:
     - run:
         name: Show value in next step
         command: |
-          pwd
+          source ~/project/mongodb_private_ip.env 
           echo "Next step: Captured MongoDB URI:"
-          cat mongodb_private_ip.env
-
+          echo $MONGODB_PRIVATE_IP
   deploy:
     docker:
     - image: amazon/aws-cli
