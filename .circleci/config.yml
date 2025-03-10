@@ -3,15 +3,25 @@ version: 2.1
 jobs:
   deploy:
     docker:
-    - image: circleci/python:3.9
+    - image: amazon/aws-cli
     steps:
     - checkout
+    - run:
+        name: Install kubectl
+        command: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          mv kubectl /usr/local/bin/
     - run:
         name: Configure AWS CLI
         command: |
           aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
           aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
           aws configure set region $AWS_REGION
+    - run:
+        name: Setup kubectl
+        command: |
+          aws eks update-kubeconfig --region $AWS_REGION --name your-cluster-name
     - run:
         name: Install jq
         command: |
