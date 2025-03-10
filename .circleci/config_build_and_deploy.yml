@@ -133,6 +133,6 @@ workflows:
         - determine-changes
         - terraform_plan
 
-  deploy:
-    jobs:
-    - deploy
+    - deploy:
+        requires:
+        - terraform_apply
