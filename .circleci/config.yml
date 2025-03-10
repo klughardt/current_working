@@ -75,8 +75,8 @@ jobs:
         name: Capture MongoDB URI and Set Environment Variable
         command: |
           # Capture MongoDB URI from Terraform output
-          MONGO_PRIVATE_IP=$(terraform output -raw mongodb_private_ip)
-          echo "Captured MongoDB URI: $MONGO_PRIVATE_IP"
+          MONGODB_PRIVATE_IP=$(terraform output -raw mongodb_private_ip)
+          echo "Captured MongoDB URI: $MONGODB_PRIVATE_IP"
 
   deploy:
     docker:
@@ -114,11 +114,11 @@ jobs:
         command: |
           source .env
           kubectl create secret generic mongodb-secret \
-            --from-literal=MONGO_URI="mongodb://$username:$password@$MONGO_PRIVATE_IP:27017/" \
+            --from-literal=MONGO_URI="mongodb://$username:$password@$MONGODB_PRIVATE_IP:27017/" \
             --dry-run=client -o yaml | kubectl apply -f -
           echo $username
           echo $password
-          echo "mongodb://$username:$password@$MONGO_PRIVATE_IP:27017/"
+          echo "mongodb://$username:$password@$MONGODB_PRIVATE_IP:27017/"
 
     - run:
         name: Deploy to Kubernetes
