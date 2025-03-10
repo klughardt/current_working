@@ -74,6 +74,7 @@ jobs:
           terraform apply -auto-approve
           MONGODB_PRIVATE_IP=$(terraform output -raw mongodb_private_ip)
           echo $MONGODB_PRIVATE_IP >> mongodb_private_ip.env
+          mv ~/project/current_working/infra_terraform/mongodb_private_ip.env ~/project/
     - persist_to_workspace:
         root: .
         paths:
@@ -85,6 +86,7 @@ jobs:
           source ~/project/mongodb_private_ip.env 
           echo "Next step: Captured MongoDB URI:"
           echo $MONGODB_PRIVATE_IP
+
   deploy:
     docker:
     - image: amazon/aws-cli
