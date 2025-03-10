@@ -83,7 +83,7 @@ jobs:
     - run:
         name: Show value in next step
         command: |
-          source ~/project/mongodb_private_ip.env 
+          MONGODB_PRIVATE_IP = cat ~/project/mongodb_private_ip.env 
           echo "Next step: Captured MongoDB URI:"
           echo $MONGODB_PRIVATE_IP
 
