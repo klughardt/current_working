@@ -15,26 +15,16 @@ spec:
         app: webapp
     spec:
       containers:
-      - name: webapp
-        image: nanajanashia/k8s-demo-app:v1.0
+      - name: tasky
+        image: tklughardt/tasky:latest
         ports:
-        - containerPort: 3000 # comes from Image Spec
+        - containerPort: 8080 # comes from Image Spec
         env:
-        - name: USER_NAME
+        - name: MONGODB_URI
           valueFrom:
             secretKeyRef:
-              name: mongo-secret # Secret File
-              key: mongo-user # value for this key
-        - name: USER_PWD
-          valueFrom:
-            secretKeyRef:
-              name: mongo-secret # Secret File
-              key: mongo-password # value for this key
-        - name: DB_URL
-          valueFrom:
-            configMapKeyRef:
-              name: mongo-config
-              key: mongo-url
+              name: mongodb-secret # Secret File
+              key: MONGO_URI # value for this key
 ---
 apiVersion: v1
 kind: Service
