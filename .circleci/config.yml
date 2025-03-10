@@ -21,7 +21,7 @@ jobs:
     - run:
         name: Setup kubectl
         command: |
-          aws eks update-kubeconfig --region $AWS_REGION --name your-cluster-name
+          aws eks update-kubeconfig --region $AWS_REGION --name wiz-exercise-cluster
     - run:
         name: Install jq
         command: |
