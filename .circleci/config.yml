@@ -1,25 +1,88 @@
 version: 2.1
 
 jobs:
+  determine-changes:
+    docker:
+    - image: hashicorp/terraform:light
+    steps:
+    - checkout
+    - run: |
+        echo "Geänderte Dateien im Vergleich zu origin/main:"
+        git fetch origin
+        git diff origin/main..HEAD
+        echo "asdfsdafa"
 
-  terraform-destroy:
+        if git diff --name-only origin/main | grep -q '^application/tasky'; then
+          echo "BUILD_DOCKER=true" >> pipeline-flags.env
+        else
+          echo "BUILD_DOCKER=false" >> pipeline-flags.env
+        fi
+
+        if git diff --name-only origin/main | grep -q '^infrastructure/'; then
+          echo "RUN_TERRAFORM=true" >> pipeline-flags.env
+        else
+          echo "RUN_TERRAFORM=false" >> pipeline-flags.env
+        fi
+    - persist_to_workspace:
+        root: .
+        paths:
+        - pipeline-flags.env
+
+  terraform_plan:
     docker:
     - image: hashicorp/terraform:light
     steps:
     - checkout
     - attach_workspace:
         at: ~/project
+    - run: |
+        source ~/project/pipeline-flags.env 
+        if [ "$RUN_TERRAFORM" != "true" ]; then
+          echo "Terraform planning." 
+          # circleci-agent step halt
+        fi 
     - run:
         name: Initialize Terraform
         working_directory: ~/project/current_working/infra_terraform
         command: terraform init
     - run:
-        name: Terraform Destroy
+        name: Terraform Plan
         working_directory: ~/project/current_working/infra_terraform
-        command: terraform destroy -auto-approve
+        command: terraform plan
+
+  terraform_apply:
+    docker:
+    - image: hashicorp/terraform:light
+    steps:
+    - checkout
+    - attach_workspace:
+        at: ~/project
+    - run: |
+        source ~/project/pipeline-flags.env 
+        if [ "$RUN_TERRAFORM" != "true" ]; then
+          echo "Terraform running" 
+          # circleci-agent step halt
+        fi 
+    - run:
+        name: Initialize Terraform
+        working_directory: ~/project/current_working/infra_terraform
+        command: terraform init
+    - run:
+        name: Terraform Apply
+        working_directory: ~/project/current_working/infra_terraform
+        command: terraform apply -auto-approve
 
 workflows:
   version: 2
   build_and_deploy:
     jobs:
-    - terraform-destroy
+    - determine-changes
+
+    - terraform_plan:
+        requires:
+        - determine-changes
+
+    - terraform_apply:
+        requires:
+        - determine-changes
+        - terraform_plan
