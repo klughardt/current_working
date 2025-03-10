@@ -8,7 +8,7 @@ spec:
   ingressClassName: alb
   tls:
   - hosts:
-    - test.kub
+    - workwiz
     secretName: tls-secret
   rules:
   - host: workwiz
