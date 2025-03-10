@@ -83,6 +83,7 @@ jobs:
     - run:
         name: Show value in next step
         command: |
+          MONGODB_PRIVATE_IP=$(terraform output -raw mongodb_private_ip)
           MONGODB_PRIVATE_IP = cat ~/project/mongodb_private_ip.env 
           echo "Next step: Captured MongoDB URI:"
           echo $MONGODB_PRIVATE_IP
