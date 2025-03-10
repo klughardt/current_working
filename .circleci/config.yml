@@ -21,7 +21,7 @@ jobs:
     - run:
         name: Setup kubectl
         command: |
-          aws eks update-kubeconfig --region $AWS_REGION --name wiz-exercise-cluster
+          aws eks update-kubeconfig --region $AWS_REGION --name workwiz
     - run:
         name: Install jq
         command: |
@@ -43,7 +43,7 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
     - run:
         name: Deploy to Kubernetes
-        command: kubectl apply -f wiz-exercise-cluster/
+        command: kubectl apply -f workwiz/
 
 workflows:
   deploy:
