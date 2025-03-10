@@ -36,6 +36,6 @@ spec:
     app: webapp
   ports:
   - protocol: TCP
-    port: 80 # best Practice: same as targetPort
+    port: 8080 # best Practice: same as targetPort
     targetPort: 8080 # same as containerPort
     nodePort: 30080 # 30000 - 32767 -> Limited Port range by Kubernetes
