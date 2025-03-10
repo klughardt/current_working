@@ -92,6 +92,9 @@ jobs:
     - image: amazon/aws-cli
     steps:
     - checkout
+    - run:
+        name: Install tar
+        command: yum install -y tar
     - attach_workspace:
         at: ~/project
     - run:
