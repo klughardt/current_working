@@ -7,22 +7,28 @@ jobs:
     steps:
     - checkout
     - run:
-        name: Retrieve MongoDB Secret from AWS
-        command: |
-          SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id my-mongodb-secret --query SecretString --output text)
-          echo $SECRET_JSON | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > .env
+      name: Configure AWS CLI
+      command: |
+        aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+        aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+        aws configure set region $AWS_REGION
     - run:
-        name: Create Kubernetes Secret
-        command: |
-          source .env
-          kubectl create secret generic mongodb-secret \
-            --from-literal=MONGO_USER=$MONGO_USER \
-            --from-literal=MONGO_PASSWORD=$MONGO_PASSWORD \
-            --from-literal=MONGO_URI="mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/" \
-            --dry-run=client -o yaml | kubectl apply -f -
+      name: Retrieve MongoDB Secret from AWS
+      command: |
+        SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id my-mongodb-secret --query SecretString --output text)
+        echo $SECRET_JSON | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > .env
     - run:
-        name: Deploy to Kubernetes
-        command: kubectl apply -f wiz-exercise-cluster/
+      name: Create Kubernetes Secret
+      command: |
+        source .env
+        kubectl create secret generic mongodb-secret \
+          --from-literal=MONGO_USER=$MONGO_USER \
+          --from-literal=MONGO_PASSWORD=$MONGO_PASSWORD \
+          --from-literal=MONGO_URI="mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/" \
+          --dry-run=client -o yaml | kubectl apply -f -
+    - run:
+      name: Deploy to Kubernetes
+      command: kubectl apply -f wiz-exercise-cluster/
 
 workflows:
   deploy:
