@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   deploy:
     docker:
-    - image: amazon/aws-cli
+    - image: bitnami/kubectl:latest
     steps:
     - checkout
     - run:
