@@ -73,12 +73,17 @@ jobs:
         command: |
           terraform apply -auto-approve
           MONGODB_PRIVATE_IP=$(terraform output -raw mongodb_private_ip)
-          echo "Captured MongoDB URI: $MONGODB_PRIVATE_IP"
+          echo $MONGODB_PRIVATE_IP >> mongodb_private_ip.env
+    - persist_to_workspace:
+        root: .
+        paths:
+        - mongodb_private_ip.env
 
     - run:
         name: Show value in next step
         command: |
-          echo "Next step: Captured MongoDB URI: $MONGODB_PRIVATE_IP"
+          echo "Next step: Captured MongoDB URI:"
+          cat mongodb_private_ip.env
 
   deploy:
     docker:
