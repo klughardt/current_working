@@ -43,7 +43,7 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
     - run:
         name: Deploy to Kubernetes
-        command: kubectl apply -f ./mongodb-secret
+        command: kubectl apply -f ./current_working/3_tier_app_kubernetes/
 
 workflows:
   deploy:
