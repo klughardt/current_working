@@ -7,10 +7,17 @@ jobs:
     steps:
     - checkout
     - run:
+        name: Configure AWS CLI
+        command: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          aws configure set region $AWS_REGION
+    - run:
         name: Retrieve MongoDB Secret from AWS
         command: |
-          SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id my-mongodb-secret --query SecretString --output text)
+          SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id workwiz-mongodb-creds --query SecretString --output text)
           echo $SECRET_JSON | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > .env
+          cat .env
     - run:
         name: Create Kubernetes Secret
         command: |
