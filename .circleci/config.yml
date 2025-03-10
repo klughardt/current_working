@@ -122,6 +122,7 @@ jobs:
         name: Create Kubernetes Secret
         command: |
           source .env
+          source ~/project/mongodb_private_ip.env
           kubectl create secret generic mongodb-secret \
             --from-literal=MONGO_URI="mongodb://$username:$password@$MONGODB_PRIVATE_IP:27017/" \
             --dry-run=client -o yaml | kubectl apply -f -
