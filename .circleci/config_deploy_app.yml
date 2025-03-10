@@ -15,7 +15,7 @@ jobs:
     - run:
       name: Retrieve MongoDB Secret from AWS
       command: |
-        SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id my-mongodb-secret --query SecretString --output text)
+        SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id workwiz-mongodb-creds --query SecretString --output text)
         echo $SECRET_JSON | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > .env
     - run:
       name: Create Kubernetes Secret
