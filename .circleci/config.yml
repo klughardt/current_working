@@ -72,6 +72,13 @@ jobs:
         working_directory: ~/project/current_working/infra_terraform
         command: terraform apply -auto-approve
     - run:
+        name: Debug Terraform State
+        working_directory: ~/project/current_working/infra_terraform
+        command: |
+          echo "Checking Terraform state..."
+          ls -la
+          cat terraform.tfstate | jq '.'
+    - run:
         name: Capture MongoDB URI and Set Environment Variable
         command: |
           # Capture MongoDB URI from Terraform output
