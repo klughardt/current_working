@@ -39,6 +39,7 @@ jobs:
           kubectl create secret generic mongodb-secret \
             --from-literal=MONGO_URI="mongodb://$username:$password@mongodb:27017/" \
             --dry-run=client -o yaml | kubectl apply -f -
+          echo env
     - run:
         name: Deploy to Kubernetes
         command: kubectl apply -f ./current_working/3_tier_app_kubernetes/
