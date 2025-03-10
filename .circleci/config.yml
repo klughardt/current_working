@@ -41,7 +41,7 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
           echo $username
           echo $password
-          echo "mongodb://$username:$password@mongodb:27017/"
+          echo "mongodb://$username:$password@$MONGO_PRIVATE_IP:27017/"
 
     - run:
         name: Deploy to Kubernetes

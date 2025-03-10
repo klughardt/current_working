@@ -7,29 +7,45 @@ jobs:
     steps:
     - checkout
     - run:
-      name: Configure AWS CLI
-      command: |
-        aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-        aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-        aws configure set region $AWS_REGION
+        name: Install kubectl
+        command: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          mv kubectl /usr/local/bin/
     - run:
-      name: Retrieve MongoDB Secret from AWS
-      command: |
-        SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id workwiz-mongodb-creds --query SecretString --output text)
-        echo $SECRET_JSON | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > .env
-        cat .env
+        name: Configure AWS CLI
+        command: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          aws configure set region $AWS_REGION
     - run:
-      name: Create Kubernetes Secret
-      command: |
-        source .env
-        kubectl create secret generic mongodb-secret \
-          --from-literal=MONGO_USER=$MONGO_USER \
-          --from-literal=MONGO_PASSWORD=$MONGO_PASSWORD \
-          --from-literal=MONGO_URI="mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/" \
-          --dry-run=client -o yaml | kubectl apply -f -
+        name: Setup kubectl
+        command: |
+          aws eks update-kubeconfig --region $AWS_REGION --name workwiz
     - run:
-      name: Deploy to Kubernetes
-      command: kubectl apply -f wiz-exercise-cluster/
+        name: Install jq
+        command: |
+          yum install -y jq
+    - run:
+        name: Retrieve MongoDB Secret from AWS
+        command: |
+          SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id workwiz-mongodb-creds --query SecretString --output text)
+          echo $SECRET_JSON | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > .env
+          cat .env
+    - run:
+        name: Create Kubernetes Secret
+        command: |
+          source .env
+          kubectl create secret generic mongodb-secret \
+            --from-literal=MONGO_URI="mongodb://$username:$password@mongodb:27017/" \
+            --dry-run=client -o yaml | kubectl apply -f -
+          echo $username
+          echo $password
+          echo "mongodb://$username:$password@mongodb:27017/"
+
+    - run:
+        name: Deploy to Kubernetes
+        command: kubectl apply -f ./current_working/3_tier_app_kubernetes/
 
 workflows:
   deploy:

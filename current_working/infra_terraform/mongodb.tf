@@ -183,4 +183,9 @@ resource "aws_instance" "mongodb" {
   tags = {
     Name = "${var.project_name}-mongodb"
   }
+
+}
+
+output "mongodb_private_ip" {
+    value = aws_instance.mongodb.private_ip
 }
