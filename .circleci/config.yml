@@ -72,8 +72,7 @@ jobs:
         working_directory: ~/project/current_working/infra_terraform
         command: |
           terraform apply -auto-approve
-          MONGODB_PRIVATE_IP=$(terraform output -raw mongodb_private_ip)
-          echo $MONGODB_PRIVATE_IP >> mongodb_private_ip.env
+          echo "MONGODB_PRIVATE_IP = " || $(terraform output -raw mongodb_private_ip) > mongodb_private_ip.env
           mv ~/project/current_working/infra_terraform/mongodb_private_ip.env ~/project/
     - persist_to_workspace:
         root: .
@@ -83,7 +82,7 @@ jobs:
     - run:
         name: Show value in next step
         command: |
-          export MONGODB_PRIVATE_IP = cat ~/project/mongodb_private_ip.env 
+          source ~/project/mongodb_private_ip.env
           echo "Next step: Captured MongoDB URI:"
           echo $MONGODB_PRIVATE_IP
 
@@ -135,7 +134,7 @@ jobs:
 
 workflows:
   version: 2
-  build_infra:
+  build_and_deploy:
     jobs:
     - determine-changes
 
