@@ -92,6 +92,8 @@ jobs:
     - image: amazon/aws-cli
     steps:
     - checkout
+    - attach_workspace:
+        at: ~/project
     - run:
         name: Install kubectl
         command: |
