@@ -73,9 +73,9 @@ jobs:
         command: |
           terraform apply -auto-approve
           echo "MONGODB_PRIVATE_IP = " >> mongodb_private_ip.env
-          echo $(terraform output -raw mongodb_private_ip) >> mongodb_private_ip.env
+          echo -n $(terraform output -raw mongodb_private_ip) >> mongodb_private_ip.env
           cat mongodb_private_ip.env
-          mv mongodb_private_ip.env ~/project/
+          mv mongodb_private_ip.env ~
     - persist_to_workspace:
         root: .
         paths:
