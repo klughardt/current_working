@@ -70,7 +70,11 @@ jobs:
     - run:
         name: Terraform Apply
         working_directory: ~/project/current_working/infra_terraform
-        command: terraform apply -auto-approve
+        command: |
+          terraform apply -auto-approve
+          MONGODB_PRIVATE_IP=$(terraform output -raw mongodb_private_ip)
+          echo "Captured MongoDB URI: $MONGODB_PRIVATE_IP"
+
     - run:
         name: Capture MongoDB URI and Set Environment Variable
         command: |
