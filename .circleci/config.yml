@@ -96,7 +96,7 @@ jobs:
         name: Install tar
         command: |
           yum install -y tar
-          yum install gzip
+          yum install -y gzip
     - attach_workspace:
         at: ~/project
     - run:
