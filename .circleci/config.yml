@@ -76,11 +76,9 @@ jobs:
           echo "Captured MongoDB URI: $MONGODB_PRIVATE_IP"
 
     - run:
-        name: Capture MongoDB URI and Set Environment Variable
+        name: Show value in next step
         command: |
-          # Capture MongoDB URI from Terraform output
-          MONGODB_PRIVATE_IP=$(terraform output -raw mongodb_private_ip)
-          echo "Captured MongoDB URI: $MONGODB_PRIVATE_IP"
+          echo "Next step: Captured MongoDB URI: $MONGODB_PRIVATE_IP"
 
   deploy:
     docker:
