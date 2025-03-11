@@ -2,7 +2,6 @@ resource "aws_lb" "mongodb_nlb" {
   name               = "${var.project_name}-mongodb-nlb"
   internal           = false  # This makes it public
   load_balancer_type = "network"
-  security_groups    = [aws_security_group.nlb.id]
   subnets           = module.vpc.public_subnets
 
   enable_deletion_protection = false
