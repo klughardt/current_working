@@ -25,7 +25,7 @@ jobs:
         name: Build Docker Image
         command: |
           pwd
-          ls
+          ls -R
           docker build -t $ECR_REPOSITORY -f current_working/tasky/Dockerfile tasky
 
     - run:
