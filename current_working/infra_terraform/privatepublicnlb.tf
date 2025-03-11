@@ -26,6 +26,6 @@ resource "aws_lb" "mongodb_nlb" {
   name               = "${var.project_name}-mongodb-nlb"
   internal           = false  # Change to true if you want an internal NLB
   load_balancer_type = "network"
-  security_groups    = [aws_security_group.nlb_sg.id]  # Attach NLB SG
+  security_groups    = [aws_security_group.nlb.id]  # Attach NLB SG
   subnets           = module.vpc.public_subnets  # Place in public subnets
 }
