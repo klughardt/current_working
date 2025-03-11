@@ -40,6 +40,17 @@ resource "aws_lb_target_group_attachment" "mongodb_attachment" {
   port            = 27017
 }
 
+resource "aws_lb_listener" "mongodb_listener" {
+  load_balancer_arn = aws_lb.mongodb_nlb.arn
+  protocol          = "TCP"
+  port             = 27017  # MongoDB port
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.mongodb_tg.arn
+  }
+}
+
 output "mongodb_nlb_dns" {
   value = aws_lb.mongodb_nlb.dns_name
 }
