@@ -62,18 +62,3 @@ resource "aws_lb" "mongodb_nlb" {
   subnets           = module.vpc.public_subnets  # Place in public subnets
   enable_cross_zone_load_balancing = true
 }
-
-
-resource "aws_route_table" "private_subnet_rt" {
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.natgw.id
-  }
-}
-
-resource "aws_route_table" "public_subnet_rt" {
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.main.id
-  }
-}
