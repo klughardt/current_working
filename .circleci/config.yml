@@ -41,6 +41,7 @@ jobs:
           echo $username
           echo $password
           echo "mongodb://$username:$password@$MONGO_PRIVATE_IP:27017/"
+
     - run:
         name: Deploy generics to Kubernetes
         command: kubectl apply -f ./current_working/3_tier_app_kubernetes/
