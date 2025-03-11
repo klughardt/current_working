@@ -72,7 +72,7 @@ jobs:
         working_directory: ~/project/current_working/infra_terraform
         command: |
           terraform apply -auto-approve
-          echo "MONGODB_PRIVATE_IP=$(terraform output -raw mongodb_private_ip)" > mongodb_private_ip.env
+          echo "MONGODB_PRIVATE_IP=$(terraform output -raw mongodb_nlb_dns_name)" > mongodb_private_ip.env
           cat mongodb_private_ip.env
           mv mongodb_private_ip.env ~/project
     - persist_to_workspace:
