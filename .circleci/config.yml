@@ -62,7 +62,7 @@ jobs:
 
   snyk-security-scan:
     docker:
-    - image: snyk/snyk-cli:latest
+    - image: snyk/snyk-cli:alpine
     steps:
     - checkout
     - run:
