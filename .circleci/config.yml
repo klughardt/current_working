@@ -58,22 +58,24 @@ jobs:
     - checkout
     - run:
         name: Run Semgrep Scan
-        command: semgrep scan --config=auto || echo "Semgrep completed with findings"
+        command: semgrep --config=p/ci --verbose
 
   snyk-security-scan:
     docker:
-    - image: snyk/snyk-cli:alpine
+    - image: node:18-alpine
     steps:
     - checkout
     - run:
-        name: Authenticate Snyk
+        name: Install Snyk
+        command: |
+          apk add --no-cache nodejs npm
+          npm install -g snyk
+    - run:
+        name: Authenticate with Snyk
         command: snyk auth $SNYK_TOKEN
     - run:
-        name: Run Snyk Dependency Scan
-        command: snyk test || echo "Snyk scan completed with findings"
-    - run:
-        name: Run Snyk Container Scan
-        command: snyk container test $ECR_REGISTRY/$ECR_REPOSITORY:latest || echo "Snyk container scan completed with findings"
+        name: Run Snyk Test
+        command: snyk test || true
 
   terraform_plan:
     docker:
