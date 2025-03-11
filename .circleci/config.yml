@@ -12,11 +12,6 @@ jobs:
     - checkout
 
     - run:
-        name: Install AWS CLI
-        command: |
-          sudo apt-get update && sudo apt-get install -y awscli
-
-    - run:
         name: Authenticate with AWS ECR
         command: |
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
