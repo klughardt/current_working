@@ -70,19 +70,36 @@ jobs:
     - run:
         name: Terraform Apply
         working_directory: ~/project/current_working/infra_terraform
-        command: terraform apply -auto-approve
+        command: |
+          terraform refresh
+          terraform apply -auto-approve
+          echo "MONGODB_PRIVATE_IP=$(terraform output -raw mongodb_private_ip)" > mongodb_private_ip.env
+          cat mongodb_private_ip.env
+          mv mongodb_private_ip.env ~/project
+    - persist_to_workspace:
+        root: .
+        paths:
+        - mongodb_private_ip.env
+
     - run:
-      name: Capture MongoDB URI and Set Environment Variable
-      command: |
-        # Capture MongoDB URI from Terraform output
-        MONGO_PRIVATE_IP=$(terraform output -raw mongodb_private_ip)
-        echo "Captured MongoDB URI: $MONGO_PRIVATE_IP"
+        name: Show value in next step
+        command: |
+          source ~/project/mongodb_private_ip.env
+          echo "Next step: Captured MongoDB URI:"
+          echo $MONGODB_PRIVATE_IP
 
   deploy:
     docker:
     - image: amazon/aws-cli
     steps:
     - checkout
+    - run:
+        name: Install tar
+        command: |
+          yum install -y tar
+          yum install -y gzip
+    - attach_workspace:
+        at: ~/project
     - run:
         name: Install kubectl
         command: |
@@ -113,12 +130,13 @@ jobs:
         name: Create Kubernetes Secret
         command: |
           source .env
+          source ~/project/mongodb_private_ip.env
           kubectl create secret generic mongodb-secret \
-            --from-literal=MONGO_URI="mongodb://$username:$password@$MONGO_PRIVATE_IP:27017/" \
+            --from-literal=MONGO_URI="mongodb://$username:$password@$MONGODB_PRIVATE_IP:27017/" \
             --dry-run=client -o yaml | kubectl apply -f -
           echo $username
           echo $password
-          echo "mongodb://$username:$password@$MONGO_PRIVATE_IP:27017/"
+          echo "mongodb://$username:$password@$MONGODB_PRIVATE_IP:27017/"
 
     - run:
         name: Deploy to Kubernetes
@@ -126,7 +144,7 @@ jobs:
 
 workflows:
   version: 2
-  build_infra:
+  build_and_deploy:
     jobs:
     - determine-changes
 
