@@ -2,8 +2,8 @@ version: 2.1
 
 executors:
   docker-executor:
-    docker:
-    - image: circleci/python:3.9 # Base image, can be changed
+    machine:
+      image: ubuntu-2204:current
 
 jobs:
   build-and-push:
