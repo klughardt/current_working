@@ -59,6 +59,21 @@ resource "aws_lb" "mongodb_nlb" {
   name               = "${var.project_name}-mongodb-nlb"
   internal           = false  # Change to true if you want an internal NLB
   load_balancer_type = "network"
-  security_groups    = [aws_security_group.nlb.id]  # Attach NLB SG
   subnets           = module.vpc.public_subnets  # Place in public subnets
+  enable_cross_zone_load_balancing = true
+}
+
+
+resource "aws_route_table" "private_subnet_rt" {
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_nat_gateway.natgw.id
+  }
+}
+
+resource "aws_route_table" "public_subnet_rt" {
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id
+  }
 }

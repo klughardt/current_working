@@ -21,3 +21,9 @@ module "vpc" {
     "kubernetes.io/role/internal-elb"             = "1"
   }
 }
+
+resource "aws_flow_log" "vpc_logs" {
+  log_destination_type = "cloud-watch-logs"
+  traffic_type         = "ALL"
+  vpc_id               = module.vpc.vpc_id
+}
