@@ -16,7 +16,25 @@ module "eks" {
       instance_type = "t3.small"
     }
   }
-  
+  node_security_group_additional_rules = {
+    ingress_allow_access_from_control_plane = {
+      type                          = "ingress"
+      protocol                      = "tcp"
+      from_port                     = 9443
+      to_port                       = 9443
+      source_cluster_security_group = true
+      description                   = "Allow access from control plane to webhook port of AWS load balancer controller"
+    }
+  }
+}
+
+resource "aws_security_group_rule" "eks_nodes_egress_all" {
+  type        = "egress"
+  from_port   = 0
+  to_port     = 0
+  protocol    = "-1"
+  cidr_blocks = ["0.0.0.0/0"]
+  security_group_id = module.eks.node_security_group_id
 }
 
 resource "aws_iam_policy" "worker_policy" {
