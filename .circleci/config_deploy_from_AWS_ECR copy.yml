@@ -43,7 +43,7 @@ jobs:
     - run:
         name: Deploy to Kubernetes
         command: |
-          cat <<EOF | kubectl apply -f -
+          echo "
           apiVersion: apps/v1
           kind: Deployment
           metadata:
@@ -51,7 +51,7 @@ jobs:
             labels:
               app: webapp
           spec:
-            replicas: 1 # Increase for HA/LB
+            replicas: 1
             selector:
               matchLabels:
                 app: webapp
@@ -64,16 +64,16 @@ jobs:
                 - name: tasky
                   image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/lone_klughardt:latest
                   ports:
-                  - containerPort: 8080 # comes from Image Spec
+                  - containerPort: 8080
                   env:
                   - name: MONGODB_URI
                     valueFrom:
                       secretKeyRef:
-                        name: mongodb-secret # Secret File
-                        key: MONGO_URI # value for this key
+                        name: mongodb-secret
+                        key: MONGO_URI
                 imagePullSecrets:
                   - name: ecr-registry-secret
-          EOF
+          " | kubectl apply -f -
 
 workflows:
   version: 2
