@@ -71,6 +71,19 @@ jobs:
         name: Terraform Apply
         working_directory: ~/project/current_working/infra_terraform
         command: terraform apply -auto-approve
+    - run:
+        name: Capture MongoDB URI and Set Environment Variable
+        command: |
+          # Capture MongoDB URI from Terraform output
+          MONGO_URI=$(terraform output -raw mongodb_uri)
+          echo "Captured MongoDB URI: $MONGO_URI"
+
+          # Use CircleCI API to set the MONGO_URI environment variable
+          curl -u $CIRCLECI_API_USER:$CIRCLECI_API_TOKEN \
+            -X PATCH \
+            -d "{\"env_var\": {\"MONGO_URI\": \"$MONGO_URI\"}}" \
+            https://circleci.com/api/v2/project/github/<your-org>/<your-repo>/envvar
+
 
 workflows:
   version: 2
