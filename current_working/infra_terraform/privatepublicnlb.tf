@@ -29,3 +29,8 @@ resource "aws_lb" "mongodb_nlb" {
   security_groups    = [aws_security_group.nlb.id]  # Attach NLB SG
   subnets           = module.vpc.public_subnets  # Place in public subnets
 }
+
+
+  access_logs {
+    enabled = false
+  }
