@@ -28,6 +28,24 @@ module "eks" {
   }
 }
 
+resource "aws_security_group_rule" "allow_all_outbound" {
+  type              = "egress"
+  security_group_id = module.eks.eks_managed_node_groups["workwiz_app"].security_group_id
+  from_port         = 0
+  to_port           = 65535
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+}
+
+resource "aws_security_group_rule" "allow_all_icmp_outbound" {
+  type              = "egress"
+  security_group_id = module.eks.eks_managed_node_groups["workwiz_app"].security_group_id
+  from_port         = -1
+  to_port           = -1
+  protocol          = "1"
+  cidr_blocks       = ["0.0.0.0/0"]
+}
+
 resource "aws_iam_policy" "worker_policy" {
   name        = "worker-policy"
   description = "Worker policy for the ALB Ingress"
