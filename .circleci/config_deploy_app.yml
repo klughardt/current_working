@@ -21,7 +21,7 @@ jobs:
     - run:
         name: Setup kubectl
         command: |
-          aws eks update-kubeconfig --region $AWS_REGION --name workwiz
+          aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER_NAME
     - run:
         name: Install jq
         command: |
@@ -42,8 +42,51 @@ jobs:
           echo $password
           echo "mongodb://$username:$password@$MONGO_PRIVATE_IP:27017/"
     - run:
-        name: Deploy to Kubernetes
+        name: Deploy generics to Kubernetes
         command: kubectl apply -f ./current_working/3_tier_app_kubernetes/
+
+    - run:
+        name: Create ECR Pull Secret in Kubernetes
+        command: |
+          kubectl create secret docker-registry ecr-registry-secret \
+            --docker-server=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com \
+            --docker-username=AWS \
+            --docker-password=$(aws ecr get-login-password --region $AWS_REGION) \
+            --namespace default || true  # Ignore error if secret already exists
+    - run:
+        name: Deploy app to Kubernetes
+        command: |
+          cat <<EOF | kubectl apply -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: webapp-deployment
+            labels:
+              app: webapp
+          spec:
+            replicas: 1 # Increase for HA/LB
+            selector:
+              matchLabels:
+                app: webapp
+            template:
+              metadata:
+                labels:
+                  app: webapp
+              spec:
+                containers:
+                - name: tasky
+                  image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/lone_klughardt:latest
+                  ports:
+                  - containerPort: 8080 # comes from Image Spec
+                  env:
+                  - name: MONGODB_URI
+                    valueFrom:
+                      secretKeyRef:
+                        name: mongodb-secret # Secret File
+                        key: MONGO_URI # value for this key
+                imagePullSecrets:
+                  - name: ecr-registry-secret
+          EOF
 
 workflows:
   deploy:
