@@ -58,7 +58,7 @@ jobs:
     - checkout
     - run:
         name: Run Semgrep Scan
-        command: semgrep --config=p/ci --verbose
+        command: semgrep --config "https://semgrep.dev/p/security-audit" --metrics=off
 
   snyk-security-scan:
     docker:
