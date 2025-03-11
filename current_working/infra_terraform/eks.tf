@@ -78,3 +78,8 @@ resource "helm_release" "ingress" {
     value = local.cluster_name
   }
 }
+
+resource "aws_eks_addon" "example" {
+  addon_name   = "amazon-cloudwatch-observability"
+  cluster_name = local.cluster_name
+}
