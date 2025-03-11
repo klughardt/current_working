@@ -51,14 +51,16 @@ jobs:
         command: |
           checkov -d . --soft-fail
 
-  semgrep-security-scan:
+  gosec-security-scan:
     docker:
-    - image: returntocorp/semgrep:latest
+    - image: securego/gosec:latest
     steps:
     - checkout
     - run:
-        name: Run Semgrep Scan
-        command: semgrep --config "https://semgrep.dev/p/security-audit" --metrics=off
+        name: Run Gosec Security Scan
+        command: |
+          gosec -fmt=json -out=gosec-report.json ./...
+          cat gosec-report.json || true
 
   snyk-security-scan:
     docker:
@@ -212,7 +214,7 @@ workflows:
     - checkov-security-scan:
         requires:
         - determine-changes
-    - semgrep-security-scan:
+    - gosec-security-scan:
         requires:
         - determine-changes
     - snyk-security-scan:
