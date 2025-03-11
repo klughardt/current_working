@@ -8,7 +8,7 @@ module "eks" {
   vpc_id          = module.vpc.vpc_id
 
   eks_managed_node_groups = {
-    first = {
+    workwiz_app = {
       desired_capacity = 1
       max_capacity     = 3
       min_capacity     = 1
