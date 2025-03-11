@@ -8,7 +8,7 @@ resource "aws_security_group" "mongodb" {
     to_port     = 27017
     protocol    = "tcp"
  #   cidr_blocks = [var.vpc_cidr]
-     security_groups = [aws_security_group.nlb_sg.id]  # Only allow NLB
+     security_groups = [aws_security_group.nlb.id]  # Only allow NLB
   }
 
   ingress {
