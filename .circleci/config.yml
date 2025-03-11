@@ -90,8 +90,8 @@ jobs:
           echo $MONGODB_PRIVATE_IP
 
   build-and-push:
-    docker:
-    - image: cimg/aws:2023.09
+    machine:
+      image: ubuntu-2204:current
     steps:
     - checkout
     - run:
