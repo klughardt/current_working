@@ -24,7 +24,7 @@ jobs:
     - run:
         name: Build Docker Image
         command: |
-          docker build -t $ECR_REPOSITORY -f Tasky/Dockerfile Tasky
+          docker build -t $ECR_REPOSITORY -f tasky/Dockerfile tasky
 
     - run:
         name: Tag Docker Image
