@@ -18,6 +18,22 @@ resource "aws_security_group" "nlb" {
   }
 }
 
+resource "aws_lb_target_group" "mongodb_tg" {
+  name        = "${var.project_name}-mongodb-tg"
+  port        = 27017
+  protocol    = "TCP"  # Use TCP, since MongoDB isn't HTTP-based
+  vpc_id      = module.vpc.vpc_id
+  target_type = "instance"
+
+  health_check {
+    interval            = 30
+    protocol            = "TCP"  # Check if port is open
+    port                = "27017"
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
+}
+
 output "mongodb_nlb_dns" {
   value = aws_lb.mongodb_nlb.dns_name
 }
