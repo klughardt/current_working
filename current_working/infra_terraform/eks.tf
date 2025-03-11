@@ -16,6 +16,7 @@ module "eks" {
       instance_type = "t3.small"
     }
   }
+}
 
 resource "aws_iam_policy" "worker_policy" {
   name        = "worker-policy"
