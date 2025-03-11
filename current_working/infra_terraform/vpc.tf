@@ -27,3 +27,47 @@ resource "aws_flow_log" "vpc_logs" {
   traffic_type         = "ALL"
   vpc_id               = module.vpc.vpc_id
 }
+
+resource "aws_iam_role" "flow_logs_role" {
+  name = "${var.project_name}-flow-logs-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "vpc-flow-logs.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "flow_logs_policy" {
+  name        = "${var.project_name}-flow-logs-policy"
+  description = "Policy to allow VPC Flow Logs to write to CloudWatch"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "flow_logs_attach" {
+  policy_arn = aws_iam_policy.flow_logs_policy.arn
+  role       = aws_iam_role.flow_logs_role.name
+}
