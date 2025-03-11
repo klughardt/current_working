@@ -2,22 +2,14 @@ version: 2.1
 
 executors:
   docker-executor:
-    docker:
-    - image: circleci/python:3.9 # Base image, can be changed
+    machine:
+      image: ubuntu-2204:current
 
 jobs:
   build-and-push:
     executor: docker-executor
     steps:
     - checkout
-
-    - setup_remote_docker:
-        version: 20.10.14 # Ensures Docker is available
-
-    - run:
-        name: Install AWS CLI
-        command: |
-          sudo apt-get update && sudo apt-get install -y awscli
 
     - run:
         name: Authenticate with AWS ECR
@@ -27,7 +19,7 @@ jobs:
     - run:
         name: Build Docker Image
         command: |
-          docker build -t $ECR_REPOSITORY -f Tasky/Dockerfile Tasky
+          docker build -t $ECR_REPOSITORY -f current_working/tasky/Dockerfile current_working/tasky
 
     - run:
         name: Tag Docker Image
