@@ -39,6 +39,7 @@ jobs:
     - run:
         name: Scan Infrastructure Code with Checkov
         command: |
+          apk add --no-cache python3 py3-pip
           pip install checkov
           checkov -d infrastructure || true
 
