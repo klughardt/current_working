@@ -27,7 +27,7 @@ jobs:
         paths:
         - pipeline-flags.env
 
-  security-scan:
+  trivy-security-scan:
     docker:
     - image: aquasec/trivy:latest
     steps:
@@ -36,12 +36,20 @@ jobs:
         name: Scan Docker Image for Vulnerabilities
         command: |
           trivy image --severity LOW,MEDIUM,HIGH,CRITICAL --ignore-unfixed $ECR_REGISTRY/$ECR_REPOSITORY:latest || true
+
+  checkov-security-scan:
+    docker:
+    - image: python:3.9
+    steps:
+    - checkout
     - run:
-        name: Scan Infrastructure Code with Checkov
+        name: Install Checkov
         command: |
-          apk add --no-cache python3 py3-pip
-          pip install checkov
-          checkov -d infrastructure || true
+          pip install --no-cache-dir checkov
+    - run:
+        name: Run Checkov Scan
+        command: |
+          checkov -d . --soft-fail
 
   terraform_plan:
     docker:
@@ -179,7 +187,10 @@ workflows:
   build_and_deploy:
     jobs:
     - determine-changes
-    - security-scan:
+    - trivy-security-scan:
+        requires:
+        - determine-changes
+    - checkov-security-scan:
         requires:
         - determine-changes
     - terraform_plan:
