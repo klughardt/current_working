@@ -89,6 +89,31 @@ jobs:
           echo "Next step: Captured MongoDB URI:"
           echo $MONGODB_PRIVATE_IP
 
+  build-and-push:
+    machine:
+    - image: ubuntu-2204:current
+    steps:
+    - checkout
+    - run:
+        name: Authenticate with AWS ECR
+        command: |
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+    - run:
+        name: Build Docker Image
+        command: |
+          docker build -t $ECR_REPOSITORY -f current_working/tasky/Dockerfile current_working/tasky
+
+    - run:
+        name: Tag Docker Image
+        command: |
+          docker tag $ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+    - run:
+        name: Push Docker Image to AWS ECR
+        command: |
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
   deploy:
     docker:
     - image: amazon/aws-cli
@@ -202,6 +227,12 @@ workflows:
         - determine-changes
         - terraform_plan
 
+    - build-and-push:
+        requires:
+        - determine-changes
+        - terraform_apply
+
     - deploy:
         requires:
-        - terraform_apply
+        - determine-changes
+        - build-and-push
