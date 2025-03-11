@@ -91,7 +91,7 @@ jobs:
 
   build-and-push:
     docker:
-    - image: ubuntu-2204:current
+    - image: amazon/aws-cli
     steps:
     - checkout
     - run:
