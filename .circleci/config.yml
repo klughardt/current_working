@@ -16,7 +16,7 @@ jobs:
     - run:
         name: Terraform Destroy
         working_directory: ~/project/current_working/infra_terraform
-        command: terraform destroy -auto-approve
+        command: terraform destroy -auto-approve -lock=false
 
 workflows:
   version: 2
