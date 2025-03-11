@@ -34,6 +34,12 @@ resource "aws_lb_target_group" "mongodb_tg" {
   }
 }
 
+resource "aws_lb_target_group_attachment" "mongodb_attachment" {
+  target_group_arn = aws_lb_target_group.mongodb_tg.arn
+  target_id        = [aws_instance.mongodb.id]
+  port            = 27017
+}
+
 output "mongodb_nlb_dns" {
   value = aws_lb.mongodb_nlb.dns_name
 }
