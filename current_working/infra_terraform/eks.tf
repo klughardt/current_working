@@ -17,7 +17,7 @@ module "eks" {
     }
   }
   node_security_group_additional_rules = {
-   ingress_allow_access_from_control_plane = {
+    ingress_allow_access_from_control_plane = {
       type                          = "ingress"
       protocol                      = "tcp"
       from_port                     = 9443
@@ -27,9 +27,6 @@ module "eks" {
     }
   }
 }
-
-
-
 
 resource "aws_iam_policy" "worker_policy" {
   name        = "worker-policy"
