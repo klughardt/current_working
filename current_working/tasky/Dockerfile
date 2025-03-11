@@ -6,6 +6,7 @@ COPY . .
 RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /go/src/tasky/tasky
 
+# RUN rm -rf /bin/sh /bin/ash
 
 FROM alpine:3.17.0 as release
 
@@ -15,5 +16,3 @@ COPY --from=build  /go/src/tasky/assets ./assets
 ADD wizexercise.txt .
 EXPOSE 8080
 ENTRYPOINT ["/app/tasky"]
-
-

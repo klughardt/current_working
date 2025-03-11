@@ -48,7 +48,8 @@ jobs:
     - run:
         name: Terraform Plan
         working_directory: ~/project/current_working/infra_terraform
-        command: terraform plan
+        command: |
+          terraform plan
 
   terraform_apply:
     docker:
