@@ -26,7 +26,7 @@ jobs:
         command: |
           pwd
           ls
-          docker build -t $ECR_REPOSITORY -f tasky/Dockerfile tasky
+          docker build -t $ECR_REPOSITORY -f current_working/tasky/Dockerfile tasky
 
     - run:
         name: Tag Docker Image
