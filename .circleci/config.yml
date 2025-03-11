@@ -90,7 +90,7 @@ jobs:
           echo $MONGODB_PRIVATE_IP
 
   build-and-push:
-    machine:
+    docker:
     - image: ubuntu-2204:current
     steps:
     - checkout
