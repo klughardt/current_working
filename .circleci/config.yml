@@ -91,7 +91,7 @@ jobs:
 
   build-and-push:
     docker:
-    - image: amazon/aws-cli
+    - image: cimg/aws:2023.09
     steps:
     - checkout
     - run:
