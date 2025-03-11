@@ -63,6 +63,7 @@ jobs:
           go mod download
     - run:
         name: Run Gosec Security Scan
+        working_directory: current_working/tasky
         command: |
           go install github.com/securego/gosec/v2/cmd/gosec@latest
           ~/go/bin/gosec -fmt=json -nosec ./... || true
