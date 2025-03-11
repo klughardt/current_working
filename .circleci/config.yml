@@ -48,7 +48,9 @@ jobs:
     - run:
         name: Terraform Plan
         working_directory: ~/project/current_working/infra_terraform
-        command: terraform plan
+        command: |
+          terraform force-unlock -force 4bff80a6-0850-79e1-4b21-df648040df75
+          terraform plan
 
   terraform_apply:
     docker:
