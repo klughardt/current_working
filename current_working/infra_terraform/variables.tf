@@ -44,7 +44,7 @@ variable "db_ami" {
 }
 
 variable "db_instance_type" {
-  default = "t2.small"
+  default = "t4g.small"
 }
 
 variable "my_ip" {
