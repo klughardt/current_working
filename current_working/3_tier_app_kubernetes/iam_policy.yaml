@@ -80,7 +80,7 @@ spec:
         StringEquals:
           ec2:CreateAction: "CreateSecurityGroup"
         Null:
-          aws:RequestTag/elbv2.k8s.aws/cluster: "false"
+          "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
     - Effect: Allow
       Action:
       - ec2:CreateTags
@@ -88,8 +88,8 @@ spec:
       Resource: "arn:aws:ec2:*:*:security-group/*"
       Condition:
         Null:
-          aws:RequestTag/elbv2.k8s.aws/cluster: "true"
-          aws:ResourceTag/elbv2.k8s.aws/cluster: "false"
+          "aws:RequestTag/elbv2.k8s.aws/cluster": "true"
+          "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
     - Effect: Allow
       Action:
       - ec2:AuthorizeSecurityGroupIngress
@@ -98,7 +98,7 @@ spec:
       Resource: "*"
       Condition:
         Null:
-          aws:ResourceTag/elbv2.k8s.aws/cluster: "false"
+          "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
     - Effect: Allow
       Action:
       - elasticloadbalancing:CreateLoadBalancer
@@ -106,7 +106,7 @@ spec:
       Resource: "*"
       Condition:
         Null:
-          aws:RequestTag/elbv2.k8s.aws/cluster: "false"
+          "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
     - Effect: Allow
       Action:
       - elasticloadbalancing:CreateListener
@@ -124,8 +124,8 @@ spec:
       - "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"
       Condition:
         Null:
-          aws:RequestTag/elbv2.k8s.aws/cluster: "true"
-          aws:ResourceTag/elbv2.k8s.aws/cluster: "false"
+          "aws:RequestTag/elbv2.k8s.aws/cluster": "true"
+          "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
     - Effect: Allow
       Action:
       - elasticloadbalancing:AddTags
@@ -139,7 +139,7 @@ spec:
           - "CreateTargetGroup"
           - "CreateLoadBalancer"
         Null:
-          aws:RequestTag/elbv2.k8s.aws/cluster: "false"
+          "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
     - Effect: Allow
       Action:
       - elasticloadbalancing:RegisterTargets
