@@ -78,14 +78,6 @@ resource "aws_iam_role_policy" "mongodb_policy" {
         ]
         Resource = aws_secretsmanager_secret.mongosecret.arn
       },
-      {
-        Effect = "Allow"
-        Action = [
-          "kms:Decrypt",
-          "kms:GenerateDataKey"
-        ]
-        Resource = aws_kms_key.s3_key.arn
-      }
     ]
   })
 }
