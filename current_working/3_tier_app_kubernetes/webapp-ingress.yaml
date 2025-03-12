@@ -12,6 +12,7 @@ spec:
     - workwiz
     secretName: tls-secret
   rules:
+  - host: workwiz
     http:
       paths:
       - path: /
