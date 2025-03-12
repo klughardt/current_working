@@ -27,6 +27,22 @@ jobs:
         paths:
         - pipeline-flags.env
 
+  terraform_plan:
+    docker:
+    - image: hashicorp/terraform:light
+    steps:
+    - checkout
+    - attach_workspace:
+        at: ~/project
+    - run:
+        name: Initialize Terraform
+        working_directory: ~/project/current_working/infra_terraform
+        command: terraform init
+    - run:
+        name: Terraform Plan
+        working_directory: ~/project/current_working/infra_terraform
+        command: terraform plan
+
   trivy-security-scan:
     docker:
     - image: aquasec/trivy:latest
@@ -77,22 +93,6 @@ jobs:
         working_directory: current_working/tasky
         command: |
           golangci-lint run --enable=gosec --enable=errcheck --enable=govet --enable=staticcheck --enable=unused || true
-
-  terraform_plan:
-    docker:
-    - image: hashicorp/terraform:light
-    steps:
-    - checkout
-    - attach_workspace:
-        at: ~/project
-    - run:
-        name: Initialize Terraform
-        working_directory: ~/project/current_working/infra_terraform
-        command: terraform init
-    - run:
-        name: Terraform Plan
-        working_directory: ~/project/current_working/infra_terraform
-        command: terraform plan
 
   terraform_apply:
     docker:
@@ -243,6 +243,9 @@ workflows:
   build_and_deploy:
     jobs:
     - determine-changes
+    - terraform_plan:
+        requires:
+        - determine-changes
     - trivy-security-scan:
         requires:
         - determine-changes
@@ -253,9 +256,6 @@ workflows:
         requires:
         - determine-changes
     - golangci-lint-scan:
-        requires:
-        - determine-changes
-    - terraform_plan:
         requires:
         - determine-changes
     - terraform_apply:

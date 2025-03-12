@@ -50,7 +50,7 @@ resource "kubernetes_cluster_role_binding" "web_app_cluster_admin" {
   subject {
     kind      = "ServiceAccount"
     name      = kubernetes_service_account.web_app_sa.metadata[0].name
-    namespace = kubernetes_namespace.project_namespace.metadata[0].name
+    namespace = "tasky"
   }
 }
 
