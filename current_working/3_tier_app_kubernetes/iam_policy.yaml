@@ -79,7 +79,7 @@ spec:
       Condition:
         StringEquals:
           ec2:CreateAction: "CreateSecurityGroup"
-        Null:
+        StringEqualsIfExists:
           "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
     - Effect: Allow
       Action:
@@ -87,7 +87,7 @@ spec:
       - ec2:DeleteTags
       Resource: "arn:aws:ec2:*:*:security-group/*"
       Condition:
-        Null:
+        StringEqualsIfExists:
           "aws:RequestTag/elbv2.k8s.aws/cluster": "true"
           "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
     - Effect: Allow
@@ -97,7 +97,7 @@ spec:
       - ec2:DeleteSecurityGroup
       Resource: "*"
       Condition:
-        Null:
+        StringEqualsIfExists:
           "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
     - Effect: Allow
       Action:
@@ -105,7 +105,7 @@ spec:
       - elasticloadbalancing:CreateTargetGroup
       Resource: "*"
       Condition:
-        Null:
+        StringEqualsIfExists:
           "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
     - Effect: Allow
       Action:
@@ -123,7 +123,7 @@ spec:
       - "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*"
       - "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"
       Condition:
-        Null:
+        StringEqualsIfExists:
           "aws:RequestTag/elbv2.k8s.aws/cluster": "true"
           "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
     - Effect: Allow
@@ -138,7 +138,7 @@ spec:
           elasticloadbalancing:CreateAction:
           - "CreateTargetGroup"
           - "CreateLoadBalancer"
-        Null:
+        StringEqualsIfExists:
           "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
     - Effect: Allow
       Action:
