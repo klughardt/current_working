@@ -28,18 +28,17 @@ module "eks" {
   }
 }
 
-resource "null_resource" "create_namespace" {
-  provisioner "local-exec" {
-    command = <<EOT
-      kubectl get namespace tasky || kubectl create namespace tasky
-    EOT
+# Define namespace in Terraform
+resource "kubernetes_namespace" "tasky" {
+  metadata {
+    name = "tasky"
   }
 }
 
 resource "kubernetes_service_account" "web_app_sa" {
   metadata {
-    name      = "web-app-sa"  # Replace with your desired service account name
-    namespace = "tasky"
+    name      = "web-app-sa"
+    namespace = kubernetes_namespace.tasky.metadata[0].name
   }
 }
 
@@ -58,9 +57,9 @@ resource "kubernetes_cluster_role_binding" "web_app_cluster_admin" {
   subject {
     kind      = "ServiceAccount"
     name      = kubernetes_service_account.web_app_sa.metadata[0].name
-    namespace = "tasky"
+    namespace = kubernetes_namespace.tasky.metadata[0].name
   }
-  depends_on = [null_resource.create_namespace]
+  depends_on = [kubernetes_namespace.tasky]
 }
 
 # IAM Policy and Role attachment for the worker nodes
