@@ -49,6 +49,10 @@ resource "aws_iam_role_policy_attachment" "additional" {
   role       = each.value.iam_role_name
 }
 
+data "aws_eks_cluster_auth" "cluster" {
+  name = module.eks.cluster_id
+}
+
 # Kubernetes Provider Configuration
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
