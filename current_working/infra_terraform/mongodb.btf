@@ -108,7 +108,7 @@ resource "aws_secretsmanager_secret_version" "mongosecret" {
 }
 
 resource "aws_instance" "mongodb" {
-  ami           = var.db_ami
+  ami           = "ami-00eeec150ceb5f5a8"
   instance_type = var.db_instance_type
   subnet_id     = module.vpc.public_subnets[0]
 
