@@ -31,7 +31,7 @@ module "eks" {
 resource "kubernetes_service_account" "web_app_sa" {
   metadata {
     name      = "web-app-sa"  # Replace with your desired service account name
-    namespace = kubernetes_namespace.project_namespace.metadata[0].name
+    namespace = "tasky"
   }
 }
 
