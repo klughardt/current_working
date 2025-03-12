@@ -12,10 +12,10 @@ module "eks" {
       desired_capacity = 1
       max_capacity     = 3
       min_capacity     = 1
-
-      instance_type = "t3.small"
+      instance_type    = "t3.small"
     }
   }
+
   node_security_group_additional_rules = {
     ingress_allow_access_from_control_plane = {
       type                          = "ingress"
@@ -40,15 +40,29 @@ resource "aws_security_group_rule" "eks_nodes_egress_all" {
 resource "aws_iam_policy" "worker_policy" {
   name        = "worker-policy"
   description = "Worker policy for the ALB Ingress"
-
-  policy = file("iam-policy.json")
+  policy      = file("iam-policy.json")
 }
 
 resource "aws_iam_role_policy_attachment" "additional" {
   for_each = module.eks.eks_managed_node_groups
-
   policy_arn = aws_iam_policy.worker_policy.arn
   role       = each.value.iam_role_name
+}
+
+# Kubernetes Provider Configuration
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+  token                  = module.eks.cluster_auth_token
+}
+
+# Helm Provider Configuration
+provider "helm" {
+  kubernetes {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+    token                  = module.eks.cluster_auth_token
+  }
 }
 
 resource "helm_release" "ingress" {
@@ -56,7 +70,6 @@ resource "helm_release" "ingress" {
   chart      = "aws-load-balancer-controller"
   repository = "https://aws.github.io/eks-charts"
   version    = "1.4.6"
-
   namespace  = "kube-system"
 
   set {
@@ -69,7 +82,7 @@ resource "helm_release" "ingress" {
   }
   set {
     name  = "clusterName"
-    value = local.cluster_name
+    value = module.eks.cluster_id
   }
   set {
     name  = "serviceAccount.create"
@@ -83,10 +96,27 @@ resource "helm_release" "ingress" {
   depends_on = [module.eks]
 }
 
-
+# AWS EKS Add-On
 resource "aws_eks_addon" "cloudwatch_observability" {
   addon_name   = "amazon-cloudwatch-observability"
-  cluster_name = module.eks.cluster_name
+  cluster_name = module.eks.cluster_id
 
-  depends_on = [module.eks]  # Ensures cluster exists before applying add-on
+  depends_on = [module.eks]
+}
+
+# Terraform Outputs
+output "cluster_id" {
+  value = module.eks.cluster_id
+}
+
+output "cluster_endpoint" {
+  value = module.eks.cluster_endpoint
+}
+
+output "cluster_certificate_authority_data" {
+  value = module.eks.cluster_certificate_authority_data
+}
+
+output "node_security_group_id" {
+  value = module.eks.node_security_group_id
 }
