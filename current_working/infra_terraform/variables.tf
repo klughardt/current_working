@@ -21,7 +21,8 @@ variable "cluster_name" {
 }
 
 variable "mongodb_ami" {
-  default = "ami-0a49b025fffbbdac6" # Ubuntu 18.04
+#  default = "ami-0a49b025fffbbdac6" # Ubuntu 18.04
+  default = "ami-01c14b7c8b4d5d4fa"  # Ubuntu 18.04
 }
 
 variable "ec2_key_name" {
