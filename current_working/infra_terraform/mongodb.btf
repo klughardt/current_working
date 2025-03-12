@@ -101,7 +101,7 @@ resource "aws_secretsmanager_secret_version" "mongosecret" {
 }
 
 resource "aws_instance" "mongodb" {
-  ami           = "ami-07eaa4a9e58b9dbb1" # var.db_ami
+  ami           = "ami-00f86d6f4ee866d49" # var.db_ami
   instance_type = var.db_instance_type
   subnet_id     = module.vpc.public_subnets[0]
 
@@ -122,21 +122,10 @@ resource "aws_instance" "mongodb" {
     unzip awscliv2.zip
     ./aws/install
 
-    # Install SSH Server - only for testing!
-    apt-get install -y openssh-server
-    systemctl enable ssh
-    systemctl start ssh
-
-    # Install MongoDB 3.6
-    wget -qO - https://www.mongodb.org/static/pgp/server-3.6.asc | apt-key add -
-    echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.6 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.6.list
+    curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | gpg -o /usr/share/keyrings/mongodb-server-8.0.gpg --dearmor
+    echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/8.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-8.0.list
     apt-get update
-    apt-get install -y mongodb-org=3.6.23
-
-    # Add user with really weak password -- never in real life!
-    useradd -m -s /bin/bash ubuntu
-    echo "ubuntu:YourSecurePassword" | chpasswd
-    usermod -aG sudo ubuntu
+    apt-get install -y mongodb-org mongodb-database-tools
 
     sed -i -e 's/  bindIp: 127.0.0.1/  bindIp: 0.0.0.0/g' /etc/mongod.conf
     echo -e "security:\n  authorization: enabled" >> /etc/mongod.conf
@@ -146,7 +135,7 @@ resource "aws_instance" "mongodb" {
 
     max_attempts=30
     attempt=0
-    while ! mongo --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1; do
+    while ! mongosh --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1; do
         attempt=$((attempt + 1))
         if [ $attempt -eq $max_attempts ]; then
             echo "Failed to connect to MongoDB after $max_attempts attempts"
@@ -160,7 +149,7 @@ resource "aws_instance" "mongodb" {
     DB_USERNAME=$(echo $CREDENTIALS | jq -r .username)
     DB_PASSWORD=$(echo $CREDENTIALS | jq -r .password)
 
-    mongo admin --eval "db.createUser({user: '$DB_USERNAME', pwd: '$DB_PASSWORD', roles:[{role:'root',db:'admin'}]})"
+    mongosh admin --eval "db.createUser({user: '$DB_USERNAME', pwd: '$DB_PASSWORD', roles:[{role:'root',db:'admin'}]})"
 
     cat << 'EOB' > /usr/local/bin/backup_mongo.sh
     #!/bin/bash
