@@ -167,6 +167,7 @@ jobs:
           source ~/project/mongodb_private_ip.env
           kubectl create secret generic mongodb-secret \
             --from-literal=MONGO_URI="mongodb://$username:$password@$MONGODB_PRIVATE_IP:27017/" \
+            --namespace tasky \
             --dry-run=client -o yaml | kubectl apply -f -
     - run:
         name: Create ECR Pull Secret in Kubernetes
@@ -175,7 +176,7 @@ jobs:
             --docker-server=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com \
             --docker-username=AWS \
             --docker-password=$(aws ecr get-login-password --region $AWS_REGION) \
-            --namespace default || true
+            --namespace tasky || true
     - run:
         name: Deploy WebApp to Kubernetes
         command: |
@@ -184,6 +185,7 @@ jobs:
           kind: Deployment
           metadata:
             name: webapp-deployment
+            namespace: tasky
             labels:
               app: webapp
           spec:
