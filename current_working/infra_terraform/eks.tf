@@ -52,6 +52,7 @@ resource "kubernetes_cluster_role_binding" "web_app_cluster_admin" {
     name      = kubernetes_service_account.web_app_sa.metadata[0].name
     namespace = "tasky"
   }
+    depends_on = [kubernetes_namespace.tasky]
 }
 
 # IAM Policy and Role attachment for the worker nodes

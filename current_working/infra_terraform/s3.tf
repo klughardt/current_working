@@ -3,16 +3,17 @@ resource "aws_s3_bucket" "log_bucket" {
   force_destroy = true
 }
 
+
+resource "aws_s3_bucket" "backup" {
+  bucket = "${var.project_name}-backup-bucket"
+  force_destroy = true
+}
+
 resource "aws_s3_bucket_logging" "backup" {
   bucket = aws_s3_bucket.backup.id
 
   target_bucket = aws_s3_bucket.log_bucket.id
   target_prefix = "log/"
-}
-
-resource "aws_s3_bucket" "backup" {
-  bucket = "${var.project_name}-backup-bucket"
-  force_destroy = true
 }
 
 # publically accessible
