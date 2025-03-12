@@ -83,19 +83,6 @@ resource "helm_release" "ingress" {
   depends_on = [module.eks]
 }
 
-  set {
-    name  = "autoDiscoverAwsRegion"
-    value = "true"
-  }
-  set {
-    name  = "autoDiscoverAwsVpcID"
-    value = "true"
-  }
-  set {
-    name  = "clusterName"
-    value = local.cluster_name
-  }
-}
 
 resource "aws_eks_addon" "example" {
   addon_name   = "amazon-cloudwatch-observability"
