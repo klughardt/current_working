@@ -1,4 +1,7 @@
+data "aws_guardduty_detector" "existing" {}
+
 resource "aws_guardduty_detector" "main" {
+  count = length(data.aws_guardduty_detector.existing.id) == 0 ? 1 : 0
   enable = true
 }
 
