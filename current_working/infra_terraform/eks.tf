@@ -28,13 +28,6 @@ module "eks" {
   }
 }
 
-# Declare the Kubernetes Namespace
-resource "kubernetes_namespace" "project_namespace" {
-  metadata {
-    name = "tasky"  # Replace with your desired namespace name
-  }
-}
-
 resource "kubernetes_service_account" "web_app_sa" {
   metadata {
     name      = "web-app-sa"  # Replace with your desired service account name

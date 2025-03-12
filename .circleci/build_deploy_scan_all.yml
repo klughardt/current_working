@@ -73,7 +73,7 @@ jobs:
     steps:
     - checkout
     - run:
-        name: Run GolangCI-Lint Security Scan
+        name: Run GolangCI-Lint Quality Scan
         working_directory: current_working/tasky
         command: |
           golangci-lint run --enable=gosec --enable=errcheck --enable=govet --enable=staticcheck --enable=unused || true
@@ -203,6 +203,7 @@ jobs:
                 labels:
                   app: webapp
               spec:
+                serviceAccountName: web-app-sa
                 containers:
                 - name: tasky
                   image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/lone_klughardt:latest

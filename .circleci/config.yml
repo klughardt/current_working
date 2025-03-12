@@ -73,7 +73,7 @@ jobs:
     steps:
     - checkout
     - run:
-        name: Run GolangCI-Lint Security Scan
+        name: Run GolangCI-Lint Quality Scan
         working_directory: current_working/tasky
         command: |
           golangci-lint run --enable=gosec --enable=errcheck --enable=govet --enable=staticcheck --enable=unused || true
