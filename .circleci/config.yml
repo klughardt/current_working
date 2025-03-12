@@ -157,11 +157,6 @@ jobs:
           aws configure set region $AWS_REGION
           aws eks update-kubeconfig --region $AWS_REGION --name workwiz
     - run:
-        name: Install IAMPolicy CRDs
-        command: |
-          kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/aws-iam-authenticator/master/deploy/kubernetes/iam-policy/iam-policy-crd.yaml
-
-    - run:
         name: Retrieve MongoDB Secret from AWS
         command: |
           SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id workwiz-mongodb-creds --query SecretString --output text)
