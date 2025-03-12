@@ -76,7 +76,7 @@ jobs:
         name: Run GolangCI-Lint Security Scan
         working_directory: current_working/tasky
         command: |
-          golangci-lint run --disable-all --enable=gosec || true
+          golangci-lint run --enable=gosec --enable=errcheck --enable=govet --enable=staticcheck --enable=unused
 
   terraform_plan:
     docker:
@@ -161,6 +161,10 @@ jobs:
         command: |
           SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id workwiz-mongodb-creds --query SecretString --output text)
           echo $SECRET_JSON | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > .env
+    - run:
+        name: Ensure Tasky Namespace Exists
+        command: |
+          kubectl create namespace tasky --dry-run=client -o yaml | kubectl apply -f -
     - run:
         name: Create Kubernetes Secret
         command: |
