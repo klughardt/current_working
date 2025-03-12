@@ -70,7 +70,7 @@ resource "helm_release" "ingress" {
   }
   set {
     name  = "serviceAccount.create"
-    value = "false"
+    value = "true"
   }
   set {
     name  = "serviceAccount.name"
@@ -80,10 +80,13 @@ resource "helm_release" "ingress" {
   depends_on = [module.eks]
 }
 
-# AWS EKS Add-On
 resource "aws_eks_addon" "cloudwatch_observability" {
   addon_name   = "amazon-cloudwatch-observability"
   cluster_name = module.eks.cluster_id
+
+  lifecycle {
+    ignore_changes = [addon_name]  # Prevent Terraform from trying to re-create the addon
+  }
 
   depends_on = [module.eks]
 }
