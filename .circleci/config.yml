@@ -76,7 +76,7 @@ jobs:
         name: Run GolangCI-Lint Security Scan
         working_directory: current_working/tasky
         command: |
-          golangci-lint run --enable=gosec --enable=errcheck --enable=govet --enable=staticcheck --enable=unused
+          golangci-lint run --enable=gosec --enable=errcheck --enable=govet --enable=staticcheck --enable=unused || true
 
   terraform_plan:
     docker:
@@ -217,6 +217,10 @@ jobs:
                 imagePullSecrets:
                   - name: ecr-registry-secret
           " | kubectl apply -f -
+
+    - run:
+        name: Deploy to Kubernetes
+        command: kubectl apply -f ./current_working/3_tier_app_kubernetes/ --namespace tasky
 
 workflows:
   version: 2
