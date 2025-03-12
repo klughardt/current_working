@@ -84,7 +84,9 @@ resource "helm_release" "ingress" {
 }
 
 
-resource "aws_eks_addon" "example" {
+resource "aws_eks_addon" "cloudwatch_observability" {
   addon_name   = "amazon-cloudwatch-observability"
-  cluster_name = local.cluster_name
+  cluster_name = module.eks.cluster_name
+
+  depends_on = [module.eks]  # Ensures cluster exists before applying add-on
 }
