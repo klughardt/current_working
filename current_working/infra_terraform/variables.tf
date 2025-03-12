@@ -40,7 +40,7 @@ variable "db_password" {
 }
 
 variable "db_ami" {
-  default = "ami-01c14b7c8b4d5d4fa" # ubuntu 18.04
+  default = "ami-0866a3c8686eaeeba" # ubuntu 18.04
 }
 
 variable "db_instance_type" {
