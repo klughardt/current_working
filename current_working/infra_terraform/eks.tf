@@ -28,15 +28,26 @@ module "eks" {
   }
 }
 
-resource "aws_security_group_rule" "eks_nodes_egress_all" {
-  type        = "egress"
-  from_port   = 0
-  to_port     = 0
-  protocol    = "-1"
-  cidr_blocks = ["0.0.0.0/0"]
-  security_group_id = module.eks.node_security_group_id
+# Creating ClusterRoleBinding for cluster-admin permissions
+resource "kubernetes_cluster_role_binding" "web_app_cluster_admin" {
+  metadata {
+    name = "web-app-cluster-admin-binding"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "cluster-admin"
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.web_app_sa.metadata[0].name
+    namespace = kubernetes_namespace.project_namespace.metadata[0].name
+  }
 }
 
+# IAM Policy and Role attachment for the worker nodes
 resource "aws_iam_policy" "worker_policy" {
   name        = "worker-policy"
   description = "Worker policy for the ALB Ingress"
@@ -49,6 +60,7 @@ resource "aws_iam_role_policy_attachment" "additional" {
   role       = each.value.iam_role_name
 }
 
+# Helm release for AWS Load Balancer Controller
 resource "helm_release" "ingress" {
   name       = "ingress"
   chart      = "aws-load-balancer-controller"
@@ -80,6 +92,7 @@ resource "helm_release" "ingress" {
   depends_on = [module.eks]
 }
 
+# CloudWatch observability addon
 resource "aws_eks_addon" "cloudwatch_observability" {
   addon_name   = "amazon-cloudwatch-observability"
   cluster_name = module.eks.cluster_id

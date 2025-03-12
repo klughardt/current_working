@@ -203,6 +203,7 @@ jobs:
                 labels:
                   app: webapp
               spec:
+                serviceAccountName: web_app_sa
                 containers:
                 - name: tasky
                   image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/lone_klughardt:latest
