@@ -28,6 +28,14 @@ module "eks" {
   }
 }
 
+resource "null_resource" "create_namespace" {
+  provisioner "local-exec" {
+    command = <<EOT
+      kubectl get namespace tasky || kubectl create namespace tasky
+    EOT
+  }
+}
+
 resource "kubernetes_service_account" "web_app_sa" {
   metadata {
     name      = "web-app-sa"  # Replace with your desired service account name
