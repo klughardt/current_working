@@ -74,6 +74,7 @@ jobs:
     - checkout
     - run:
         name: Run GolangCI-Lint Security Scan
+        working_directory: current_working/tasky
         command: |
           golangci-lint run --disable-all --enable=gosec || true
 
