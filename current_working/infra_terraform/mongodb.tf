@@ -141,14 +141,6 @@ resource "aws_instance" "mongodb" {
 
     systemctl restart mongod
 
-
-    sleep 30  # Wait 30 seconvds before checking status
-    # Verify MongoDB is running before continuing
-    if ! systemctl is-active --quiet mongod; then
-        echo "MongoDB failed to start"
-        exit 1
-    fi
-
     max_attempts=30
     attempt=0
     while ! mongo --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1; do
@@ -158,7 +150,7 @@ resource "aws_instance" "mongodb" {
             exit 1
         fi
         echo "Waiting for MongoDB to be ready... (attempt $attempt/$max_attempts)"
-        sleep 2
+        sleep 5
     done
 
     max_attempts=10
@@ -176,9 +168,6 @@ resource "aws_instance" "mongodb" {
     CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.mongosecret.id} --region ${var.region} --query SecretString --output text)
     DB_USERNAME=$(echo $CREDENTIALS | jq -r .username)
     DB_PASSWORD=$(echo $CREDENTIALS | jq -r .password)
-
-    echo $DB_USERNAME
-    echo $DB_PASSWORD
 
     mongo admin --eval "db.createUser({user: '$DB_USERNAME', pwd: '$DB_PASSWORD', roles:[{role:'root',db:'admin'}]})"
     
