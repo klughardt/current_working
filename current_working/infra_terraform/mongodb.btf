@@ -161,9 +161,24 @@ resource "aws_instance" "mongodb" {
         sleep 2
     done
 
+    max_attempts=10
+    attempt=0
+    while ! CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.mongosecret.id} --region ${var.region} --query SecretString --output text); do
+        attempt=$((attempt + 1))
+        if [ $attempt -eq $max_attempts ]; then
+            echo "Failed to retrieve secrets from AWS Secrets Manager"
+            exit 1
+        fi
+        echo "Retrying secrets retrieval... (attempt $attempt/$max_attempts)"
+        sleep 5
+    done
+
     CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.mongosecret.id} --region ${var.region} --query SecretString --output text)
     DB_USERNAME=$(echo $CREDENTIALS | jq -r .username)
     DB_PASSWORD=$(echo $CREDENTIALS | jq -r .password)
+
+    echo $DB_USERNAME
+    echo $DB_PASSWORD
 
     mongo admin --eval "db.createUser({user: '$DB_USERNAME', pwd: '$DB_PASSWORD', roles:[{role:'root',db:'admin'}]})"
     
@@ -174,7 +189,6 @@ resource "aws_instance" "mongodb" {
     BACKUP_DIR="/tmp/$BACKUP_NAME"
     S3_BUCKET="${aws_s3_bucket.backup.bucket}"
 
-    sleep 10
     CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.mongosecret.id} --region ${var.region} --query SecretString --output text)
     DB_USERNAME=$(echo $CREDENTIALS | jq -r .username)
     DB_PASSWORD=$(echo $CREDENTIALS | jq -r .password)
