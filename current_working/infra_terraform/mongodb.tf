@@ -195,7 +195,7 @@ resource "aws_instance" "mongodb" {
     EOB
 
     chmod +x /usr/local/bin/backup_mongo.sh
-    echo "0 * * * * ubuntu /bin/bash -c 'source ~/.profile && /usr/local/bin/backup_mongo.sh >> /var/log/backup_mongo.log 2>&1'" | crontab -u ubuntu -
+    echo "0 * * * * /bin/bash -c 'source ~/.profile && /usr/local/bin/backup_mongo.sh >> /home/ubuntu/backup_mongo.log 2>&1'" | crontab -u ubuntu -
   EOF
 
   tags = {
