@@ -139,7 +139,10 @@ resource "aws_instance" "mongodb" {
     systemctl enable mongod
     systemctl daemon-reload
 
-    sleep 5  # Wait 5 seconds before checking status
+    systemctl restart mongod
+
+
+    sleep 30  # Wait 30 seconvds before checking status
     # Verify MongoDB is running before continuing
     if ! systemctl is-active --quiet mongod; then
         echo "MongoDB failed to start"
@@ -162,12 +165,8 @@ resource "aws_instance" "mongodb" {
     DB_USERNAME=$(echo $CREDENTIALS | jq -r .username)
     DB_PASSWORD=$(echo $CREDENTIALS | jq -r .password)
 
-    if ! mongo admin --eval "db.getUser('$DB_USERNAME')" | grep -q "user"; then
-      mongo admin --eval "db.createUser({user: '$DB_USERNAME', pwd: '$DB_PASSWORD', roles:[{role:'root',db:'admin'}]})"
-    else
-      echo "MongoDB user already exists. Skipping user creation."
-    fi
-
+    mongo admin --eval "db.createUser({user: '$DB_USERNAME', pwd: '$DB_PASSWORD', roles:[{role:'root',db:'admin'}]})"
+    
     cat << 'EOB' > /usr/local/bin/backup_mongo.sh
     #!/bin/bash
     TIMESTAMP=$(date +"%F-%H%M%S")
