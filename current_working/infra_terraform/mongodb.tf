@@ -130,6 +130,7 @@ resource "aws_instance" "mongodb" {
     apt-get install -y mongodb-org
 
     command -v mongo >/dev/null 2>&1 || { echo "MongoDB installation failed"; exit 1; }
+
     export PATH=$PATH:/usr/bin:/usr/local/bin
 
     sed -i -e 's/  bindIp: 127.0.0.1/  bindIp: 0.0.0.0/g' /etc/mongod.conf
@@ -138,6 +139,7 @@ resource "aws_instance" "mongodb" {
     systemctl enable mongod
     systemctl daemon-reload
 
+    sleep 5  # Wait 5 seconds before checking status
     # Verify MongoDB is running before continuing
     if ! systemctl is-active --quiet mongod; then
         echo "MongoDB failed to start"
