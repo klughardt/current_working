@@ -123,9 +123,8 @@ resource "aws_instance" "mongodb" {
 
     apt-get install ec2-instance-connect 
 
-    curl -fsSL https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
-    echo "deb [ arch=arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
-    sudo apt-get update
+    curl -fsSL https://www.mongodb.org/static/pgp/server-4.4.asc | sudo tee /usr/share/keyrings/mongodb-server-4.4.gpg > /dev/null
+    echo "deb [ arch=arm64 signed-by=/usr/share/keyrings/mongodb-server-4.4.gpg ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.listsudo apt-get update
     sudo apt-get install -y mongodb-org
 
     sed -i -e 's/  bindIp: 127.0.0.1/  bindIp: 0.0.0.0/g' /etc/mongod.conf
@@ -136,7 +135,7 @@ resource "aws_instance" "mongodb" {
 
     max_attempts=30
     attempt=0
-    while ! mongosh --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1; do
+    while ! mongo --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1; do
         attempt=$((attempt + 1))
         if [ $attempt -eq $max_attempts ]; then
             echo "Failed to connect to MongoDB after $max_attempts attempts"
@@ -150,7 +149,7 @@ resource "aws_instance" "mongodb" {
     DB_USERNAME=$(echo $CREDENTIALS | jq -r .username)
     DB_PASSWORD=$(echo $CREDENTIALS | jq -r .password)
 
-    mongosh admin --eval "db.createUser({user: '$DB_USERNAME', pwd: '$DB_PASSWORD', roles:[{role:'root',db:'admin'}]})"
+    mongo admin --eval "db.createUser({user: '$DB_USERNAME', pwd: '$DB_PASSWORD', roles:[{role:'root',db:'admin'}]})"
 
     cat << 'EOB' > /usr/local/bin/backup_mongo.sh
     #!/bin/bash
@@ -159,11 +158,12 @@ resource "aws_instance" "mongodb" {
     BACKUP_DIR="/tmp/$BACKUP_NAME"
     S3_BUCKET="${aws_s3_bucket.backup.bucket}"
 
+    sleep 10
     CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.mongosecret.id} --region ${var.region} --query SecretString --output text)
     DB_USERNAME=$(echo $CREDENTIALS | jq -r .username)
     DB_PASSWORD=$(echo $CREDENTIALS | jq -r .password)
 
-    mongodump --archive=$BACKUP_DIR.archive --gzip --username $DB_USERNAME --password $DB_PASSWORD --authenticationDatabase admin
+    mongodump --host localhost --archive=$BACKUP_DIR.archive --gzip --username $DB_USERNAME --password $DB_PASSWORD --authenticationDatabase admin
 
     aws s3 cp $BACKUP_DIR.archive s3://$S3_BUCKET/$BACKUP_NAME.archive
 
