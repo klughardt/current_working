@@ -170,12 +170,17 @@ resource "aws_instance" "mongodb" {
     DB_PASSWORD=$(echo $CREDENTIALS | jq -r .password)
 
     mongo admin --eval "db.createUser({user: '$DB_USERNAME', pwd: '$DB_PASSWORD', roles:[{role:'root',db:'admin'}]})"
-    
+
+    sudo -u ubuntu mkdir -p /home/ubuntu/tmp
+
     cat << 'EOB' > /usr/local/bin/backup_mongo.sh
     #!/bin/bash
+    source ~/.profile
+    source ~/.bashrc
+
     TIMESTAMP=$(date +"%F-%H%M%S")
     BACKUP_NAME="mongo-backup-$TIMESTAMP"
-    BACKUP_DIR="/tmp/$BACKUP_NAME"
+    BACKUP_DIR="/home/ubuntu/tmp/$BACKUP_NAME"
     S3_BUCKET="${aws_s3_bucket.backup.bucket}"
 
     CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.mongosecret.id} --region ${var.region} --query SecretString --output text)
@@ -184,19 +189,18 @@ resource "aws_instance" "mongodb" {
 
     mongodump --host localhost --archive=$BACKUP_DIR.archive --gzip --username $DB_USERNAME --password $DB_PASSWORD --authenticationDatabase admin
 
-    /usr/local/bin/aws s3 cp $BACKUP_DIR.archive s3://$S3_BUCKET/$BACKUP_NAME.archive
+    aws s3 cp $BACKUP_DIR.archive s3://$S3_BUCKET/$BACKUP_NAME.archive
 
     rm -f $BACKUP_DIR.archive
     EOB
 
     chmod +x /usr/local/bin/backup_mongo.sh
-    (crontab -l 2>/dev/null; echo "0 * * * * /usr/local/bin/backup_mongo.sh >> /var/log/backup_mongo.log 2>&1") | crontab -
+    echo "0 * * * * ubuntu /bin/bash -c 'source ~/.profile && /usr/local/bin/backup_mongo.sh >> /var/log/backup_mongo.log 2>&1'" | crontab -u ubuntu -
   EOF
 
   tags = {
     Name = "${var.project_name}-mongodb"
   }
-
 }
 
 output "mongodb_private_ip" {
