@@ -194,7 +194,7 @@ jobs:
             labels:
               app: webapp
           spec:
-            replicas: 1
+            replicas: 2
             selector:
               matchLabels:
                 app: webapp
@@ -235,7 +235,11 @@ jobs:
           " | kubectl apply -f -        
 
     - run:
-        name: Deploy to Kubernetes
+        name: Restart WebApp Deployment Pods
+        command: |
+          kubectl rollout restart deployment webapp-deployment -n tasky
+    - run:
+        name: Deploy the rest to Kubernetes
         command: kubectl apply -f ./current_working/3_tier_app_kubernetes/ --namespace tasky
 
 workflows:
