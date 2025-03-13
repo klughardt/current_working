@@ -184,7 +184,7 @@ resource "aws_instance" "mongodb" {
 
     mongodump --host localhost --archive=$BACKUP_DIR.archive --gzip --username $DB_USERNAME --password $DB_PASSWORD --authenticationDatabase admin
 
-    aws s3 cp $BACKUP_DIR.archive s3://$S3_BUCKET/$BACKUP_NAME.archive
+    /usr/local/bin/aws s3 cp $BACKUP_DIR.archive s3://$S3_BUCKET/$BACKUP_NAME.archive
 
     rm -f $BACKUP_DIR.archive
     EOB
