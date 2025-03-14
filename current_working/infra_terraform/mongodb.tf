@@ -4,28 +4,27 @@ resource "aws_security_group" "mongodb" {
   vpc_id      = module.vpc.vpc_id
 
   ingress {
+    from_port   = 27017
+    to_port     = 27017
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
+  ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }
 
-# Allow ONLY web-app pods to access MongoDB
-resource "aws_security_group_rule" "mongodb_webapp_access" {
+resource "aws_security_group_rule" "mongodb_eks_access" {
   type                     = "ingress"
   from_port                = 27017
   to_port                  = 27017
   protocol                 = "tcp"
   security_group_id        = aws_security_group.mongodb.id
-  source_security_group_id = aws_security_group.webapp_sg.id
+  source_security_group_id = module.eks.node_security_group_id
 }
 
 resource "aws_iam_role" "mongodb_role" {

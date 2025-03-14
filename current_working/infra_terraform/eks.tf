@@ -35,32 +35,44 @@ resource "kubernetes_namespace" "tasky" {
   }
 }
 
-# Security group for web application pods
-resource "aws_security_group" "webapp_sg" {
-  name        = "${var.project_name}-webapp-sg"
-  description = "Security group for web application pods"
-  vpc_id      = module.vpc.vpc_id
-}
-
-# Security group rule: Allow webapp_sg to connect to MongoDB
-resource "aws_security_group_rule" "webapp_egress_mongodb" {
-  type                     = "egress"
-  from_port                = 27017
-  to_port                  = 27017
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.webapp_sg.id
-  cidr_blocks       = ["${aws_instance.mongodb.private_ip}/32"] # MongoDB IP as single entry CIDR Block
-}
-
-# Attach security group to service account
 resource "kubernetes_service_account" "web_app_sa" {
   metadata {
     name      = "web-app-sa"
     namespace = kubernetes_namespace.tasky.metadata[0].name
-    annotations = {
-      "eks.amazonaws.com/security-group" = aws_security_group.webapp_sg.id
-    }
   }
+}
+
+# Creating ClusterRoleBinding for cluster-admin permissions
+resource "kubernetes_cluster_role_binding" "web_app_cluster_admin" {
+  metadata {
+    name = "web-app-cluster-admin-binding"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "cluster-admin"
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.web_app_sa.metadata[0].name
+    namespace = kubernetes_namespace.tasky.metadata[0].name
+  }
+  depends_on = [kubernetes_namespace.tasky]
+}
+
+# IAM Policy and Role attachment for the worker nodes
+resource "aws_iam_policy" "worker_policy" {
+  name        = "worker-policy"
+  description = "Worker policy for the ALB Ingress"
+  policy      = file("iam-policy.json")
+}
+
+resource "aws_iam_role_policy_attachment" "additional" {
+  for_each = module.eks.eks_managed_node_groups
+  policy_arn = aws_iam_policy.worker_policy.arn
+  role       = each.value.iam_role_name
 }
 
 # Helm release for AWS Load Balancer Controller
@@ -93,6 +105,28 @@ resource "helm_release" "ingress" {
   }
 
   depends_on = [module.eks]
+}
+
+# CloudWatch observability addon
+resource "aws_eks_addon" "cloudwatch_observability" {
+  addon_name   = "amazon-cloudwatch-observability"
+  cluster_name = module.eks.cluster_id
+
+  lifecycle {
+    ignore_changes = [addon_name]  # Prevent Terraform from trying to re-create the addon
+  }
+
+  depends_on = [module.eks]
+}
+
+# Security Group rule for outbound access from the EKS nodes - overly permissive!
+resource "aws_security_group_rule" "allow_all_outbound" {
+  type              = "egress"
+  security_group_id = module.eks.eks_managed_node_groups["workwiz_app"].security_group_id
+  from_port         = 0
+  to_port           = 65535
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
 }
 
 # Terraform Outputs
