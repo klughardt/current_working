@@ -119,14 +119,50 @@ resource "aws_eks_addon" "cloudwatch_observability" {
   depends_on = [module.eks]
 }
 
-# Security Group rule for outbound access from the EKS nodes - overly permissive!
-resource "aws_security_group_rule" "allow_all_outbound" {
-  type              = "egress"
-  security_group_id = module.eks.eks_managed_node_groups["workwiz_app"].security_group_id
-  from_port         = 0
-  to_port           = 65535
-  protocol          = "-1"
-  cidr_blocks       = ["0.0.0.0/0"]
+resource "aws_security_group" "webapp" {
+  name        = "${var.project_name}-webapp-sg"
+  description = "Security group for web application pods"
+  vpc_id      = module.vpc.vpc_id
+}
+
+resource "aws_security_group_rule" "webapp_egress_mongodb" {
+  type                     = "egress"
+  from_port                = 27017
+  to_port                  = 27017
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.webapp.id
+  source_security_group_id = aws_security_group.mongodb.id
+}
+
+resource "kubernetes_network_policy" "allow_webapp_to_mongodb" {
+  metadata {
+    name      = "allow-webapp-to-mongodb"
+    namespace = "tasky"
+  }
+
+  spec {
+    pod_selector {
+      match_labels = {
+        app = "web-app"
+      }
+    }
+
+    policy_types = ["Ingress"]
+
+    ingress {
+      from {
+        pod_selector {
+          match_labels = {
+            app = "web-app"
+          }
+        }
+      }
+      ports {
+        protocol = "TCP"
+        port     = 27017
+      }
+    }
+  }
 }
 
 # Terraform Outputs
