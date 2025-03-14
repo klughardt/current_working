@@ -18,13 +18,14 @@ resource "aws_security_group" "mongodb" {
   }
 }
 
+# Allow ONLY web-app pods to access MongoDB
 resource "aws_security_group_rule" "mongodb_webapp_access" {
   type                     = "ingress"
   from_port                = 27017
   to_port                  = 27017
   protocol                 = "tcp"
   security_group_id        = aws_security_group.mongodb.id
-  source_security_group_id = aws_security_group.webapp.id
+  source_security_group_id = aws_security_group.webapp_sg.id
 }
 
 resource "aws_iam_role" "mongodb_role" {
