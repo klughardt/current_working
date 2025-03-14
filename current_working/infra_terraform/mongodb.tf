@@ -7,7 +7,7 @@ resource "aws_security_group" "mongodb" {
     from_port   = 27017
     to_port     = 27017
     protocol    = "tcp"
-    cidr_blocks = [module.eks.node_security_group_id] # Kubernetes nodes only
+    cidr_blocks = module.eks.node_security_group_id # Kubernetes nodes only
   }
 
   ingress {
