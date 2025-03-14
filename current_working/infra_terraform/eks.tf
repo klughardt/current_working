@@ -7,6 +7,8 @@ module "eks" {
   subnet_ids      = module.vpc.private_subnets
   vpc_id          = module.vpc.vpc_id
 
+  cluster_enabled_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+
   eks_managed_node_groups = {
     workwiz_app = {
       desired_capacity = 1
