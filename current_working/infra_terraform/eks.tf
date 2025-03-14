@@ -49,7 +49,7 @@ resource "aws_security_group_rule" "webapp_egress_mongodb" {
   to_port                  = 27017
   protocol                 = "tcp"
   security_group_id        = aws_security_group.webapp_sg.id
-  cidr_blocks       = [aws_instance.mongodb.private_ip]
+  cidr_blocks       = ["${aws_instance.mongodb.private_ip}/32"] # MongoDB IP as single entry CIDR Block
 }
 
 # Attach security group to service account
