@@ -110,7 +110,7 @@ resource "helm_release" "ingress" {
 }
 
 # CloudWatch observability addon
-resource "aws_eks_addon" "cloudwatch_observability" {
+resource "aws_eks_addon" "cloudwatch_observability_workwiz" {
   addon_name   = "amazon-cloudwatch-observability"
   cluster_name = module.eks.cluster_id
 
