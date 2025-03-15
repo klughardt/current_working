@@ -30,13 +30,14 @@ module "eks" {
   }
 }
 
-# Define namespace in Terraform
+# Namespace
 resource "kubernetes_namespace" "tasky" {
   metadata {
     name = "tasky"
   }
 }
 
+# Service Account
 resource "kubernetes_service_account" "web_app_sa" {
   metadata {
     name      = "web-app-sa"
@@ -44,7 +45,7 @@ resource "kubernetes_service_account" "web_app_sa" {
   }
 }
 
-# Creating ClusterRoleBinding for cluster-admin permissions
+# Cluster Role Binding
 resource "kubernetes_cluster_role_binding" "web_app_cluster_admin" {
   metadata {
     name = "web-app-cluster-admin-binding"
@@ -61,23 +62,23 @@ resource "kubernetes_cluster_role_binding" "web_app_cluster_admin" {
     name      = kubernetes_service_account.web_app_sa.metadata[0].name
     namespace = kubernetes_namespace.tasky.metadata[0].name
   }
-  depends_on = [kubernetes_namespace.tasky]
 }
 
-# IAM Policy and Role attachment for the worker nodes
+# IAM Policy for Worker Nodes
 resource "aws_iam_policy" "worker_policy" {
   name        = "worker-policy"
   description = "Worker policy for the ALB Ingress"
   policy      = file("iam-policy.json")
 }
 
-resource "aws_iam_role_policy_attachment" "additional" {
-  for_each = module.eks.eks_managed_node_groups
+# Attach IAM Policy to Worker Node Roles
+resource "aws_iam_role_policy_attachment" "worker_node_attachment" {
+  for_each  = module.eks.node_groups
   policy_arn = aws_iam_policy.worker_policy.arn
   role       = each.value.iam_role_name
 }
 
-# Helm release for AWS Load Balancer Controller
+# AWS Load Balancer Controller via Helm
 resource "helm_release" "ingress" {
   name       = "ingress"
   chart      = "aws-load-balancer-controller"
@@ -95,7 +96,7 @@ resource "helm_release" "ingress" {
   }
   set {
     name  = "clusterName"
-    value = module.eks.cluster_id
+    value = local.cluster_name
   }
   set {
     name  = "serviceAccount.create"
@@ -109,22 +110,22 @@ resource "helm_release" "ingress" {
   depends_on = [module.eks]
 }
 
-# CloudWatch observability addon
+# CloudWatch Observability Addon
 resource "aws_eks_addon" "cloudwatch_observability_workwiz" {
   addon_name   = "amazon-cloudwatch-observability"
- cluster_name = module.eks.cluster_id
+  cluster_name = local.cluster_name
 
   lifecycle {
-    ignore_changes = [addon_name]  # Prevent Terraform from trying to re-create the addon
+    ignore_changes = [addon_name]
   }
 
   depends_on = [module.eks]
 }
 
-# Security Group rule for outbound access from the EKS nodes - overly permissive!
+# Allow outbound traffic for EKS Nodes (Security Group Rule)
 resource "aws_security_group_rule" "allow_all_outbound" {
   type              = "egress"
-  security_group_id = module.eks.eks_managed_node_groups["workwiz_app"].security_group_id
+  security_group_id = module.eks.node_security_group_id
   from_port         = 0
   to_port           = 65535
   protocol          = "-1"
