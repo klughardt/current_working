@@ -73,10 +73,11 @@ resource "aws_iam_policy" "worker_policy" {
 
 # Attach IAM Policy to Worker Node Roles
 resource "aws_iam_role_policy_attachment" "worker_node_attachment" {
-  for_each  = module.eks.node_groups
+  for_each  = module.eks.eks_managed_node_groups
   policy_arn = aws_iam_policy.worker_policy.arn
-  role       = each.value.iam_role_name
+  role       = each.value.iam_role_arn
 }
+
 
 # AWS Load Balancer Controller via Helm
 resource "helm_release" "ingress" {
