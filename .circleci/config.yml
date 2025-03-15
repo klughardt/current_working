@@ -42,7 +42,6 @@ jobs:
         name: Terraform Plan
         working_directory: ~/project/current_working/infra_terraform
         command: |
-          terraform refresh
           terraform plan
 
   trivy-security-scan:
