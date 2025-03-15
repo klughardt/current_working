@@ -155,7 +155,7 @@ jobs:
         name: Configure AWS CLI & EKS
         command: |
           aws configure set region $AWS_REGION
-          aws eks update-kubeconfig --region $AWS_REGION --name workwiz
+          aws eks update-kubeconfig --region $AWS_REGION --name workwiz-eks
     - run:
         name: Retrieve MongoDB Secret from AWS
         command: |
