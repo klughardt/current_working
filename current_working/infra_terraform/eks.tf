@@ -110,16 +110,16 @@ resource "helm_release" "ingress" {
 }
 
 # CloudWatch observability addon
-#resource "aws_eks_addon" "cloudwatch_observability_workwiz" {
-#  addon_name   = "amazon-cloudwatch-observability"
-# cluster_name = module.eks.cluster_id
-#
-#  lifecycle {
-#    ignore_changes = [addon_name]  # Prevent Terraform from trying to re-create the addon
-#  }
-#
-#  depends_on = [module.eks]
-#}
+resource "aws_eks_addon" "cloudwatch_observability_workwiz" {
+  addon_name   = "amazon-cloudwatch-observability"
+ cluster_name = module.eks.cluster_id
+
+  lifecycle {
+    ignore_changes = [addon_name]  # Prevent Terraform from trying to re-create the addon
+  }
+
+  depends_on = [module.eks]
+}
 
 # Security Group rule for outbound access from the EKS nodes - overly permissive!
 resource "aws_security_group_rule" "allow_all_outbound" {
