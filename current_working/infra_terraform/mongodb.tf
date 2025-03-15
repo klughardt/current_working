@@ -25,6 +25,8 @@ resource "aws_security_group_rule" "mongodb_eks_access" {
   protocol                 = "tcp"
   security_group_id        = aws_security_group.mongodb.id
   source_security_group_id = module.eks.node_security_group_id
+
+  depends_on = [module.eks]
 }
 
 resource "aws_iam_role" "mongodb_role" {
