@@ -194,7 +194,7 @@ jobs:
             labels:
               app: webapp
           spec:
-            replicas: 3
+            replicas: 6
             selector:
               matchLabels:
                 app: webapp
