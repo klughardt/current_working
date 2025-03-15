@@ -17,7 +17,7 @@ variable "vpc_cidr" {
 }
 
 variable "cluster_name" {
-  default = "wiz-exercise-cluster"
+  default = "wiz-exercise-eks"
 }
 
 variable "mongodb_ami" {
