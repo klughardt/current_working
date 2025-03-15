@@ -8,11 +8,9 @@ metadata:
 spec:
   ingressClassName: alb
   tls:
-  - hosts:
-    - workwiz
-    secretName: tls-secret
+  - secretName: tls-secret
   rules:
-    http:
+  - http:
       paths:
       - path: /
         pathType: Prefix
