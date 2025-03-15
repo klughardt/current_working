@@ -14,7 +14,7 @@ module "eks" {
       desired_capacity = 3
       max_capacity     = 3
       min_capacity     = 1
-      instance_type    = "t3.small"
+      instance_type    = "t3.medium"
     }
   }
 
@@ -75,8 +75,9 @@ resource "aws_iam_policy" "worker_policy" {
 resource "aws_iam_role_policy_attachment" "worker_node_attachment" {
   for_each  = module.eks.eks_managed_node_groups
   policy_arn = aws_iam_policy.worker_policy.arn
-  role       = each.value.iam_role_arn
+  role       = each.value.iam_role_name  # Corrected from iam_role_arn to iam_role_name
 }
+
 
 
 # AWS Load Balancer Controller via Helm
