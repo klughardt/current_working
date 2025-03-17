@@ -1,5 +1,5 @@
 variable "project_name" {
-  default = "workwiz"
+  default = "workwiz-clean"
 }
 
 variable "region" {
@@ -13,11 +13,11 @@ variable "secondary_region" {
 }
 
 variable "vpc_cidr" {
-  default = "10.16.0.0/16"
+  default = "10.32.0.0/16"
 }
 
 variable "cluster_name" {
-  default = "workwiz-cluster"
+  default = "workwiz-cluster-clean"
 }
 
 variable "mongodb_ami" {
