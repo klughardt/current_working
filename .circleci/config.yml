@@ -280,9 +280,17 @@ workflows:
   build_and_deploy:
     jobs:
     - determine-changes
+        - terraform_plan_eks:
+        requires:
+        - determine-changes
+    - terraform_apply_eks:
+        requires:
+        - determine-changes
+        - terraform_plan_eks
     - terraform_plan:
         requires:
         - determine-changes
+        - terraform_apply_eks
     - trivy-security-scan:
         requires:
         - determine-changes
