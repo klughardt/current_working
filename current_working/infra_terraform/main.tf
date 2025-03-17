@@ -40,11 +40,6 @@ provider "helm" {
 
 data "aws_availability_zones" "available" {}
 
-locals {
-  cluster_name = "workwiz"
-}
-
-
 module "eks-kubeconfig" {
   source  = "hyperbadger/eks-kubeconfig/aws"
   version = "1.0.0"
@@ -55,5 +50,5 @@ module "eks-kubeconfig" {
 
 resource "local_file" "kubeconfig" {
   content  = module.eks-kubeconfig.kubeconfig
-  filename = "kubeconfig_${local.cluster_name}"
+  filename = "kubeconfig_${var.cluster_name}"
 }
