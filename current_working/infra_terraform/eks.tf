@@ -30,7 +30,30 @@ module "eks" {
   }
 }
 
+resource "kubernetes_service_account" "web_app_sa" {
+  metadata {
+    name      = "web-app-sa"
+    namespace = "tasky"  # Hardcoded instead of referencing a Terraform resource
+  }
+}
+# Creating ClusterRoleBinding for cluster-admin permissions
+resource "kubernetes_cluster_role_binding" "web_app_cluster_admin" {
+  metadata {
+    name = "web-app-cluster-admin-binding"
+  }
 
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "cluster-admin"
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.web_app_sa.metadata[0].name
+    namespace = "tasky"
+  }
+}
 
 # IAM Policy and Role attachment for the worker nodes
 resource "aws_iam_policy" "worker_policy" {
