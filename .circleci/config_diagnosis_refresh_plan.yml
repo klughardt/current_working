@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  refresh and plan:
+  refreshplan:
     docker:
     - image: hashicorp/terraform:light
     steps:
@@ -15,6 +15,6 @@ jobs:
           terraform plan
 
 workflows:
-  refreshplan:
+  refresh and plan:
     jobs:
-    - refresh and plan
+    - refreshplan
