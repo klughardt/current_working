@@ -33,10 +33,9 @@ module "eks" {
 resource "kubernetes_service_account" "web_app_sa" {
   metadata {
     name      = "web-app-sa"
-    namespace = kubernetes_namespace.tasky.metadata[0].name
+    namespace = "tasky"  # Hardcoded instead of referencing a Terraform resource
   }
 }
-
 # Creating ClusterRoleBinding for cluster-admin permissions
 resource "kubernetes_cluster_role_binding" "web_app_cluster_admin" {
   metadata {
