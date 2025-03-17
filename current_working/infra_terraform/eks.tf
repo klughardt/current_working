@@ -11,9 +11,9 @@ module "eks" {
 
   eks_managed_node_groups = {
     workwiz_app = {
-      desired_capacity = 3
+      desired_capacity = 2
       max_capacity     = 3
-      min_capacity     = 2
+      min_capacity     = 1
       instance_type    = "t3.medium"
     }
   }
@@ -148,5 +148,5 @@ output "cluster_certificate_authority_data" {
 }
 
 output "node_security_group_id" {
-  value = module.eks.node_security_group_id
+  value = module.eks.node_security_group_id 
 }
