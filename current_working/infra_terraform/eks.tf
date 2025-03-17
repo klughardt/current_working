@@ -30,18 +30,6 @@ module "eks" {
   }
 }
 
-# Define namespace in Terraform
-resource "kubernetes_namespace" "tasky" {
-  metadata {
-    name = "tasky"
-  }
-  
-  lifecycle {
-    ignore_changes = [metadata]  # Prevents Terraform from failing when checking for this resource
-  }
-  depends_on = [module.eks] # Ensure EKS is ready first
-}
-
 resource "kubernetes_service_account" "web_app_sa" {
   metadata {
     name      = "web-app-sa"
