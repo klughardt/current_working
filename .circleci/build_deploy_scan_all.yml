@@ -42,6 +42,7 @@ jobs:
         name: Terraform Apply
         working_directory: ~/project/current_working/infra_terraform
         command: |
+          terraform refresh
           terraform plan -target=module.eks 
 
   terraform_plan:
@@ -188,11 +189,11 @@ jobs:
         name: Configure AWS CLI & EKS
         command: |
           aws configure set region $AWS_REGION
-          aws eks update-kubeconfig --region $AWS_REGION --name workwiz-cluster-clean
+          aws eks update-kubeconfig --region $AWS_REGION --name workwiz-tasky-cluster
     - run:
         name: Retrieve MongoDB Secret from AWS
         command: |
-          SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id workwiz-mongodb-creds --query SecretString --output text)
+          SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id workwiz-tasky-mongodb-creds --query SecretString --output text)
           echo $SECRET_JSON | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > .env
     - run:
         name: Ensure Tasky Namespace Exists
@@ -280,9 +281,6 @@ workflows:
   build_and_deploy:
     jobs:
     - determine-changes
-    - terraform_plan:
-        requires:
-        - determine-changes
     - trivy-security-scan:
         requires:
         - determine-changes
@@ -297,7 +295,7 @@ workflows:
         - determine-changes
     - terraform_apply:
         requires:
-        - terraform_plan
+        - determine-changes
     - build-and-push:
         requires:
         - determine-changes
