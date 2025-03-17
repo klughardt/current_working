@@ -27,6 +27,23 @@ jobs:
         paths:
         - pipeline-flags.env
 
+  terraform_plan_eks:
+    docker:
+    - image: hashicorp/terraform:light
+    steps:
+    - checkout
+    - attach_workspace:
+        at: ~/project
+    - run:
+        name: Initialize Terraform
+        working_directory: ~/project/current_working/infra_terraform
+        command: terraform init
+    - run:
+        name: Terraform Apply
+        working_directory: ~/project/current_working/infra_terraform
+        command: |
+          terraform plan -target=module.eks 
+
   terraform_plan:
     docker:
     - image: hashicorp/terraform:light
@@ -93,6 +110,23 @@ jobs:
         working_directory: current_working/tasky
         command: |
           golangci-lint run --enable=gosec --enable=errcheck --enable=govet --enable=staticcheck --enable=unused || true
+
+  terraform_apply_eks:
+    docker:
+    - image: hashicorp/terraform:light
+    steps:
+    - checkout
+    - attach_workspace:
+        at: ~/project
+    - run:
+        name: Initialize Terraform
+        working_directory: ~/project/current_working/infra_terraform
+        command: terraform init
+    - run:
+        name: Terraform Apply
+        working_directory: ~/project/current_working/infra_terraform
+        command: |
+          terraform apply -target=module.eks -auto-approve
 
   terraform_apply:
     docker:
@@ -246,9 +280,17 @@ workflows:
   build_and_deploy:
     jobs:
     - determine-changes
+    - terraform_plan_eks:
+        requires:
+        - determine-changes
+    - terraform_apply_eks:
+        requires:
+        - determine-changes
+        - terraform_plan_eks
     - terraform_plan:
         requires:
         - determine-changes
+        - terraform_apply_eks
     - trivy-security-scan:
         requires:
         - determine-changes
