@@ -279,25 +279,7 @@ workflows:
   version: 2
   build_and_deploy:
     jobs:
-    - determine-changes
-    - terraform_plan:
-        requires:
-        - determine-changes
-    - trivy-security-scan:
-        requires:
-        - determine-changes
-    - checkov-security-scan:
-        requires:
-        - determine-changes
-    - gosec-security-scan:
-        requires:
-        - determine-changes
-    - golangci-lint-scan:
-        requires:
-        - determine-changes
-    - terraform_apply:
-        requires:
-        - terraform_plan
+
     - build-and-push:
         requires:
         - determine-changes

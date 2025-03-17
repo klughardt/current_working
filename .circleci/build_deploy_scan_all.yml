@@ -27,6 +27,23 @@ jobs:
         paths:
         - pipeline-flags.env
 
+  terraform_plan_eks:
+    docker:
+    - image: hashicorp/terraform:light
+    steps:
+    - checkout
+    - attach_workspace:
+        at: ~/project
+    - run:
+        name: Initialize Terraform
+        working_directory: ~/project/current_working/infra_terraform
+        command: terraform init
+    - run:
+        name: Terraform Apply
+        working_directory: ~/project/current_working/infra_terraform
+        command: |
+          terraform plan -target=module.eks 
+
   terraform_plan:
     docker:
     - image: hashicorp/terraform:light
@@ -94,6 +111,23 @@ jobs:
         command: |
           golangci-lint run --enable=gosec --enable=errcheck --enable=govet --enable=staticcheck --enable=unused || true
 
+  terraform_apply_eks:
+    docker:
+    - image: hashicorp/terraform:light
+    steps:
+    - checkout
+    - attach_workspace:
+        at: ~/project
+    - run:
+        name: Initialize Terraform
+        working_directory: ~/project/current_working/infra_terraform
+        command: terraform init
+    - run:
+        name: Terraform Apply
+        working_directory: ~/project/current_working/infra_terraform
+        command: |
+          terraform apply -target=module.eks -auto-approve
+
   terraform_apply:
     docker:
     - image: hashicorp/terraform:light
@@ -109,7 +143,6 @@ jobs:
         name: Terraform Apply
         working_directory: ~/project/current_working/infra_terraform
         command: |
-          terraform refresh
           terraform apply -auto-approve
           echo "MONGODB_PRIVATE_IP=$(terraform output -raw mongodb_private_ip)" > mongodb_private_ip.env
           mv mongodb_private_ip.env ~/project
@@ -155,7 +188,7 @@ jobs:
         name: Configure AWS CLI & EKS
         command: |
           aws configure set region $AWS_REGION
-          aws eks update-kubeconfig --region $AWS_REGION --name workwiz
+          aws eks update-kubeconfig --region $AWS_REGION --name workwiz-cluster-clean
     - run:
         name: Retrieve MongoDB Secret from AWS
         command: |
@@ -194,7 +227,7 @@ jobs:
             labels:
               app: webapp
           spec:
-            replicas: 6
+            replicas: 2
             selector:
               matchLabels:
                 app: webapp
