@@ -3,7 +3,13 @@ resource "aws_security_group" "mongodb" {
   description = "Security group for MongoDB server"
   vpc_id      = module.vpc.vpc_id
 
-  # Do not define any inline ingress rules here.
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -12,8 +18,6 @@ resource "aws_security_group" "mongodb" {
   }
 }
 
-
-# Inbound rule for MongoDB (port 27017) from EKS nodes
 resource "aws_security_group_rule" "mongodb_eks_access" {
   type                     = "ingress"
   security_group_id        = aws_security_group.mongodb.id
@@ -21,9 +25,11 @@ resource "aws_security_group_rule" "mongodb_eks_access" {
   to_port                  = 27017
   protocol                 = "tcp"
   source_security_group_id = module.eks.node_security_group_id
+  description              = "Allow EKS nodes to access MongoDB on port 27017"
 
   depends_on = [module.eks]
 }
+
 
 resource "aws_iam_role" "mongodb_role" {
   name = "${var.project_name}-mongodb-role"
