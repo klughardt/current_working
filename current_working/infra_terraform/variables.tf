@@ -24,7 +24,7 @@ variable "mongodb_ami" {
   #  default = "ami-0a49b025fffbbdac6" # Ubuntu 18.04
   #  default = "ami-01c14b7c8b4d5d4fa"  # Ubuntu 18.04
   # default = "ami-00eeec150ceb5f5a8" # Ubuntu 16.04
-    default = "ami-0f16019ed81305805"
+    default = "ami-0f16019ed81305805" # Ubuntu 18.04
 }
 
 variable "ec2_key_name" {
@@ -44,7 +44,7 @@ variable "db_ami" {
 }
 
 variable "db_instance_type" {
-  default = "t4g.small"
+  default = "t4g.medium"
 }
 
 variable "my_ip" {
