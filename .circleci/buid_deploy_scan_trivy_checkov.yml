@@ -27,6 +27,23 @@ jobs:
         paths:
         - pipeline-flags.env
 
+  terraform_plan:
+    docker:
+    - image: hashicorp/terraform:light
+    steps:
+    - checkout
+    - attach_workspace:
+        at: ~/project
+    - run:
+        name: Initialize Terraform
+        working_directory: ~/project/current_working/infra_terraform
+        command: terraform init
+    - run:
+        name: Terraform Plan
+        working_directory: ~/project/current_working/infra_terraform
+        command: |
+          terraform plan
+
   trivy-security-scan:
     docker:
     - image: aquasec/trivy:latest
@@ -51,21 +68,32 @@ jobs:
         command: |
           checkov -d . --soft-fail
 
-  terraform_plan:
+  gosec-security-scan:
     docker:
-    - image: hashicorp/terraform:light
+    - image: golang:1.23
     steps:
     - checkout
-    - attach_workspace:
-        at: ~/project
     - run:
-        name: Initialize Terraform
-        working_directory: ~/project/current_working/infra_terraform
-        command: terraform init
+        name: Install Gosec
+        command: |
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
     - run:
-        name: Terraform Plan
-        working_directory: ~/project/current_working/infra_terraform
-        command: terraform plan
+        name: Run Gosec Security Scan
+        working_directory: current_working/tasky
+        command: |
+          go mod tidy
+          gosec -fmt=json -stdout ./... || true
+
+  golangci-lint-scan:
+    docker:
+    - image: golangci/golangci-lint:latest
+    steps:
+    - checkout
+    - run:
+        name: Run GolangCI-Lint Quality Scan
+        working_directory: current_working/tasky
+        command: |
+          golangci-lint run --enable=gosec --enable=errcheck --enable=govet --enable=staticcheck --enable=unused || true
 
   terraform_apply:
     docker:
@@ -82,7 +110,6 @@ jobs:
         name: Terraform Apply
         working_directory: ~/project/current_working/infra_terraform
         command: |
-          terraform refresh
           terraform apply -auto-approve
           echo "MONGODB_PRIVATE_IP=$(terraform output -raw mongodb_private_ip)" > mongodb_private_ip.env
           mv mongodb_private_ip.env ~/project
@@ -128,12 +155,16 @@ jobs:
         name: Configure AWS CLI & EKS
         command: |
           aws configure set region $AWS_REGION
-          aws eks update-kubeconfig --region $AWS_REGION --name workwiz
+          aws eks update-kubeconfig --region $AWS_REGION --name workwiz-eks
     - run:
         name: Retrieve MongoDB Secret from AWS
         command: |
           SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id workwiz-mongodb-creds --query SecretString --output text)
           echo $SECRET_JSON | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > .env
+    - run:
+        name: Ensure Tasky Namespace Exists
+        command: |
+          kubectl create namespace tasky --dry-run=client -o yaml | kubectl apply -f -
     - run:
         name: Create Kubernetes Secret
         command: |
@@ -141,6 +172,7 @@ jobs:
           source ~/project/mongodb_private_ip.env
           kubectl create secret generic mongodb-secret \
             --from-literal=MONGO_URI="mongodb://$username:$password@$MONGODB_PRIVATE_IP:27017/" \
+            --namespace tasky \
             --dry-run=client -o yaml | kubectl apply -f -
     - run:
         name: Create ECR Pull Secret in Kubernetes
@@ -149,7 +181,7 @@ jobs:
             --docker-server=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com \
             --docker-username=AWS \
             --docker-password=$(aws ecr get-login-password --region $AWS_REGION) \
-            --namespace default || true
+            --namespace tasky || true
     - run:
         name: Deploy WebApp to Kubernetes
         command: |
@@ -158,6 +190,7 @@ jobs:
           kind: Deployment
           metadata:
             name: webapp-deployment
+            namespace: tasky
             labels:
               app: webapp
           spec:
@@ -170,6 +203,7 @@ jobs:
                 labels:
                   app: webapp
               spec:
+                serviceAccountName: web-app-sa
                 containers:
                 - name: tasky
                   image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/lone_klughardt:latest
@@ -183,20 +217,49 @@ jobs:
                         key: MONGO_URI
                 imagePullSecrets:
                   - name: ecr-registry-secret
-          " | kubectl apply -f -
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: webapp-service
+            namespace: tasky
+          spec:
+            type: NodePort
+            selector:
+              app: webapp
+            ports:
+            - protocol: TCP
+              port: 8080
+              targetPort: 8080
+              nodePort: 30080
+          " | kubectl apply -f -        
+
+    - run:
+        name: Restart WebApp Deployment Pods
+        command: |
+          kubectl rollout restart deployment webapp-deployment -n tasky
+    - run:
+        name: Deploy the rest to Kubernetes
+        command: kubectl apply -f ./current_working/3_tier_app_kubernetes/ --namespace tasky
 
 workflows:
   version: 2
   build_and_deploy:
     jobs:
     - determine-changes
+    - terraform_plan:
+        requires:
+        - determine-changes
     - trivy-security-scan:
         requires:
         - determine-changes
     - checkov-security-scan:
         requires:
         - determine-changes
-    - terraform_plan:
+    - gosec-security-scan:
+        requires:
+        - determine-changes
+    - golangci-lint-scan:
         requires:
         - determine-changes
     - terraform_apply:
