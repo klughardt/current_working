@@ -30,10 +30,10 @@ module "eks" {
   }
 }
 
-# All outbound connectivity
+# Outbound connectivity to private CIDR
 resource "aws_security_group_rule" "allow_all_outbound" {
   type              = "egress"
-  security_group_id = module.eks.cluster_primary_security_group_id # <-- Correct reference
+  security_group_id = module.eks.node_security_group_id # <-- Correct reference
 
   from_port         = 0
   to_port           = 65535
