@@ -28,6 +28,10 @@ resource "aws_security_group_rule" "mongodb_eks_access" {
   description              = "Allow EKS nodes to access MongoDB on port 27017"
 
   depends_on = [module.eks]
+  
+  lifecycle {
+    ignore_changes = [description]
+  }
 }
 
 
