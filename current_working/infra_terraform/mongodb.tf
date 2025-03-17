@@ -14,7 +14,7 @@ resource "aws_security_group" "mongodb" {
     from_port         = 27017
     to_port           = 27017
     protocol          = "tcp"
-    security_groups   = [module.eks.node_security_group_id]
+    cidr_blocks = [var.vpc_cidr]
   }
 
   egress {
