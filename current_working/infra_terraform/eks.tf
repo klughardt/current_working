@@ -2,7 +2,7 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "18.30.3"
 
-  cluster_name    = local.cluster_name
+  cluster_name    = var.cluster_name
   cluster_version = "1.30"
   subnet_ids      = module.vpc.private_subnets
   vpc_id          = module.vpc.vpc_id
@@ -36,6 +36,7 @@ resource "kubernetes_namespace" "tasky" {
     name = "tasky"
   }
   depends_on = [module.eks] # Ensure EKS is ready first
+
 }
 
 resource "kubernetes_service_account" "web_app_sa" {
@@ -96,7 +97,7 @@ resource "helm_release" "ingress" {
   }
   set {
     name  = "clusterName"
-    value = module.eks.cluster_id
+    value = var.cluster_name  # Use the correct variable
   }
   set {
     name  = "serviceAccount.create"
