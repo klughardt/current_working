@@ -10,13 +10,13 @@ resource "aws_security_group" "mongodb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Allow access to MongoDB on port 27017 from EKS nodes
-  ingress {
-    from_port   = 27017
-    to_port     = 27017
-    protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
-  }
+  ## Allow access to MongoDB on port 27017 from whole VPC
+  #ingress {
+  #  from_port   = 27017
+  #  to_port     = 27017
+  #  protocol    = "tcp"
+  #  cidr_blocks = [var.vpc_cidr]
+  #}
 
   egress {
     from_port   = 0
@@ -26,6 +26,7 @@ resource "aws_security_group" "mongodb" {
   }
 }
 
+# Allow access only from EKS nodes
 resource "aws_security_group_rule" "mongodb_eks_access" {
   type                     = "ingress"
   from_port                = 27017
