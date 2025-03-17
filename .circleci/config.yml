@@ -283,7 +283,6 @@ workflows:
     - terraform_plan:
         requires:
         - determine-changes
-        - terraform_apply_eks
     - trivy-security-scan:
         requires:
         - determine-changes
