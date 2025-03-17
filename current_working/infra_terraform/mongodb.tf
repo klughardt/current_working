@@ -12,15 +12,6 @@ resource "aws_security_group" "mongodb" {
   }
 }
 
-# Inbound rule for SSH access
-resource "aws_security_group_rule" "mongodb_ingress_ssh" {
-  type              = "ingress"
-  security_group_id = aws_security_group.mongodb.id
-  from_port         = 22
-  to_port           = 22
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-}
 
 # Inbound rule for MongoDB (port 27017) from EKS nodes
 resource "aws_security_group_rule" "mongodb_eks_access" {
