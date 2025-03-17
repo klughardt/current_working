@@ -281,9 +281,6 @@ workflows:
   build_and_deploy:
     jobs:
     - determine-changes
-    - terraform_plan:
-        requires:
-        - determine-changes
     - trivy-security-scan:
         requires:
         - determine-changes
@@ -298,7 +295,7 @@ workflows:
         - determine-changes
     - terraform_apply:
         requires:
-        - terraform_plan
+        - determine-changes
     - build-and-push:
         requires:
         - determine-changes

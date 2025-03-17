@@ -18,7 +18,7 @@ resource "aws_security_group" "mongodb" {
   }
 }
 
-# Allow access only from EKS nodes
+# Allow access only from EKS nodes -- somewhat unreliable...
 resource "aws_security_group_rule" "mongodb_eks_access" {
   type                     = "ingress"
   from_port                = 27017
