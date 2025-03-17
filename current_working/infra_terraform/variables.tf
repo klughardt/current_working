@@ -17,7 +17,7 @@ variable "vpc_cidr" {
 }
 
 variable "cluster_name" {
-  default = "wiz-exercise-cluster"
+  default = "workwiz-cluster"
 }
 
 variable "mongodb_ami" {
@@ -35,9 +35,9 @@ variable "db_username" {
   default = "mongoadmin"
 }
 
-variable "db_password" {
-  default = "doNotHardCodePasswordsInPlainText"
-}
+#variable "db_password" {
+#  default = "doNotHardCodePasswordsInPlainText"
+#}
 
 variable "db_ami" {
   default = "ami-00f86d6f4ee866d49" # ubuntu 18.04

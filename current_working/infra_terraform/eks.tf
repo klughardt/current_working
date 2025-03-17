@@ -124,7 +124,8 @@ resource "aws_eks_addon" "cloudwatch_observability" {
 # Security Group rule for outbound access from the EKS nodes - overly permissive!
 resource "aws_security_group_rule" "allow_all_outbound" {
   type              = "egress"
-  security_group_id = module.eks.eks_managed_node_groups["workwiz_app"].security_group_id
+  source_security_group_id = module.eks.node_security_group_id
+
   from_port         = 0
   to_port           = 65535
   protocol          = "-1"
