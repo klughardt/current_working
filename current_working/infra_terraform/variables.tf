@@ -17,7 +17,7 @@ variable "vpc_cidr" {
 }
 
 variable "cluster_name" {
-  default = "${var.project}-cluster"
+  default = "workwiz-tasky-cluster"
 }
 
 variable "mongodb_ami" {
