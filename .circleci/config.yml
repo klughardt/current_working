@@ -1,18 +1,18 @@
 version: 2.1
 
 jobs:
-  deploy:
+  refresh and plan:
     docker:
     - image: amazon/aws-cli
     steps:
     - checkout
     - run:
-        name: refresh and plan
+        name: Terraform refresh and plan
         command: |
           terraform refresh
           terraform plan
 
 workflows:
-  deploy:
+  refreshplan:
     jobs:
     - refresh and plan
