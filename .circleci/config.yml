@@ -188,7 +188,7 @@ jobs:
         name: Configure AWS CLI & EKS
         command: |
           aws configure set region $AWS_REGION
-          aws eks update-kubeconfig --region $AWS_REGION --name workwiz-cluster-tasky
+          aws eks update-kubeconfig --region $AWS_REGION --name workwiz-tasky-cluster
     - run:
         name: Ensure Tasky Namespace Exists
         command: |
