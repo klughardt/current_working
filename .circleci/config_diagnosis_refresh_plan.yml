@@ -3,12 +3,13 @@ version: 2.1
 jobs:
   deploy:
     docker:
-    - image: amazon/aws-cli
+    - image: hashicorp/terraform:light
     steps:
     - checkout
     - run:
         name: refresh and plan
         command: |
+          terraform init
           terraform refresh
           terraform plan
 
