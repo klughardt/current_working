@@ -42,6 +42,7 @@ jobs:
         name: Terraform Apply
         working_directory: ~/project/current_working/infra_terraform
         command: |
+          terraform refresh
           terraform plan -target=module.eks 
 
   terraform_plan:
