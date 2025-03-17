@@ -285,5 +285,4 @@ workflows:
         - determine-changes
     - deploy:
         requires:
-        - terraform_apply
         - build-and-push
