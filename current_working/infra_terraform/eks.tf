@@ -11,10 +11,10 @@ module "eks" {
 
   eks_managed_node_groups = {
     workwiz_app = {
-      desired_capacity = 3
+      desired_capacity = 1
       max_capacity     = 3
       min_capacity     = 1
-      instance_type    = "t3.small"
+      instance_type    = "t3.medium"
     }
   }
 
