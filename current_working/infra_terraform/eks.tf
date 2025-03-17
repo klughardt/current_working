@@ -121,6 +121,10 @@ resource "aws_security_group_rule" "allow_all_outbound" {
   to_port           = 65535
   protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
+  
+  lifecycle {
+    ignore_changes = [cidr_blocks]
+  }
 }
 
 

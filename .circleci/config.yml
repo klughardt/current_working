@@ -144,7 +144,6 @@ jobs:
         name: Terraform Apply
         working_directory: ~/project/current_working/infra_terraform
         command: |
-          terraform refresh
           terraform apply -auto-approve
           echo "MONGODB_PRIVATE_IP=$(terraform output -raw mongodb_private_ip)" > mongodb_private_ip.env
           mv mongodb_private_ip.env ~/project
