@@ -14,44 +14,42 @@ provider "aws" {
 
 data "aws_caller_identity" "current" {}
 
-# Ensure Consistent Cluster Name
+
 data "aws_eks_cluster" "cluster" {
   name = module.eks.cluster_id
-
-  depends_on = [module.eks]
 }
 
 data "aws_eks_cluster_auth" "cluster" {
-  name = local.cluster_name
+  name = module.eks.cluster_id
 }
 
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-  token                  = data.aws_eks_cluster_auth.cluster.token
+  token                  = data.aws_eks_cluster_auth.cluster.token  # Use the one from main.tf
 }
 
 provider "helm" {
   kubernetes {
     host                   = module.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-    token                  = data.aws_eks_cluster_auth.cluster.token
+    token                  = data.aws_eks_cluster_auth.cluster.token  # Use the one from main.tf
   }
 }
 
 data "aws_availability_zones" "available" {}
 
-# Use local.cluster_name consistently
 locals {
-  cluster_name = "workwiz-eks"
+  cluster_name = "workwiz"
 }
+
 
 module "eks-kubeconfig" {
   source  = "hyperbadger/eks-kubeconfig/aws"
   version = "1.0.0"
 
   depends_on = [module.eks]
-  cluster_id = local.cluster_name
+  cluster_id = module.eks.cluster_id
 }
 
 resource "local_file" "kubeconfig" {

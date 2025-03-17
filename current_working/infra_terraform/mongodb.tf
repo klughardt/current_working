@@ -10,32 +10,22 @@ resource "aws_security_group" "mongodb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  ingress {
-    from_port         = 27017
-    to_port           = 27017
-    protocol          = "tcp"
-    cidr_blocks = [var.vpc_cidr]
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-    depends_on = [module.eks]
 }
 
-#resource "aws_security_group_rule" "mongodb_eks_access" {
-#  type                     = "ingress"
-#  from_port                = 27017
-#  to_port                  = 27017
-#  protocol                 = "tcp"
-#  security_group_id        = aws_security_group.mongodb.id
-#  source_security_group_id = module.eks.node_security_group_id
-#
-#  depends_on = [module.eks]
-#}
+resource "aws_security_group_rule" "mongodb_eks_access" {
+  type                     = "ingress"
+  from_port                = 27017
+  to_port                  = 27017
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.mongodb.id
+  source_security_group_id = module.eks.eks_managed_node_groups["workwiz_app"].node_security_group_id
+}
 
 resource "aws_iam_role" "mongodb_role" {
   name = "${var.project_name}-mongodb-role"

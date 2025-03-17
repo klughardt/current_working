@@ -11,33 +11,32 @@ module "eks" {
 
   eks_managed_node_groups = {
     workwiz_app = {
-      desired_capacity = 2
+      desired_capacity = 3
       max_capacity     = 3
       min_capacity     = 1
-      instance_type    = "t3.medium"
+      instance_type    = "t3.small"
     }
   }
 
   node_security_group_additional_rules = {
     ingress_allow_access_from_control_plane = {
-      type              = "ingress"
-      protocol          = "tcp"
-      from_port         = 9443
-      to_port           = 9443
-      security_group_id = module.eks.cluster_security_group_id
-      description       = "Allow access from control plane to webhook port of AWS load balancer controller"
+      type                          = "ingress"
+      protocol                      = "tcp"
+      from_port                     = 9443
+      to_port                       = 9443
+      source_cluster_security_group = true
+      description                   = "Allow access from control plane to webhook port of AWS load balancer controller"
     }
   }
 }
 
-# Namespace
+# Define namespace in Terraform
 resource "kubernetes_namespace" "tasky" {
   metadata {
     name = "tasky"
   }
 }
 
-# Service Account
 resource "kubernetes_service_account" "web_app_sa" {
   metadata {
     name      = "web-app-sa"
@@ -45,7 +44,7 @@ resource "kubernetes_service_account" "web_app_sa" {
   }
 }
 
-# Cluster Role Binding
+# Creating ClusterRoleBinding for cluster-admin permissions
 resource "kubernetes_cluster_role_binding" "web_app_cluster_admin" {
   metadata {
     name = "web-app-cluster-admin-binding"
@@ -62,25 +61,23 @@ resource "kubernetes_cluster_role_binding" "web_app_cluster_admin" {
     name      = kubernetes_service_account.web_app_sa.metadata[0].name
     namespace = kubernetes_namespace.tasky.metadata[0].name
   }
+  depends_on = [kubernetes_namespace.tasky]
 }
 
-# IAM Policy for Worker Nodes
+# IAM Policy and Role attachment for the worker nodes
 resource "aws_iam_policy" "worker_policy" {
   name        = "worker-policy"
   description = "Worker policy for the ALB Ingress"
   policy      = file("iam-policy.json")
 }
 
-# Attach IAM Policy to Worker Node Roles
-resource "aws_iam_role_policy_attachment" "worker_node_attachment" {
-  for_each  = module.eks.eks_managed_node_groups
+resource "aws_iam_role_policy_attachment" "additional" {
+  for_each = module.eks.eks_managed_node_groups
   policy_arn = aws_iam_policy.worker_policy.arn
-  role       = each.value.iam_role_name  # Corrected from iam_role_arn to iam_role_name
+  role       = each.value.iam_role_name
 }
 
-
-
-# AWS Load Balancer Controller via Helm
+# Helm release for AWS Load Balancer Controller
 resource "helm_release" "ingress" {
   name       = "ingress"
   chart      = "aws-load-balancer-controller"
@@ -98,7 +95,7 @@ resource "helm_release" "ingress" {
   }
   set {
     name  = "clusterName"
-    value = local.cluster_name
+    value = module.eks.cluster_id
   }
   set {
     name  = "serviceAccount.create"
@@ -112,22 +109,22 @@ resource "helm_release" "ingress" {
   depends_on = [module.eks]
 }
 
-# CloudWatch Observability Addon
-resource "aws_eks_addon" "cloudwatch_observability_workwiz" {
+# CloudWatch observability addon
+resource "aws_eks_addon" "cloudwatch_observability" {
   addon_name   = "amazon-cloudwatch-observability"
-  cluster_name = local.cluster_name
+  cluster_name = module.eks.cluster_id
 
   lifecycle {
-    ignore_changes = [addon_name]
+    ignore_changes = [addon_name]  # Prevent Terraform from trying to re-create the addon
   }
 
   depends_on = [module.eks]
 }
 
-# Allow outbound traffic for EKS Nodes (Security Group Rule)
+# Security Group rule for outbound access from the EKS nodes - overly permissive!
 resource "aws_security_group_rule" "allow_all_outbound" {
   type              = "egress"
-  security_group_id = module.eks.node_security_group_id
+  security_group_id = module.eks.eks_managed_node_groups["workwiz_app"].security_group_id
   from_port         = 0
   to_port           = 65535
   protocol          = "-1"
@@ -148,5 +145,5 @@ output "cluster_certificate_authority_data" {
 }
 
 output "node_security_group_id" {
-  value = module.eks.node_security_group_id 
+  value = module.eks.node_security_group_id
 }
