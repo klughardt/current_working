@@ -13,7 +13,7 @@ module "eks" {
     workwiz_app = {
       desired_capacity = 1
       max_capacity     = 3
-      min_capacity     = 
+      min_capacity     = 1
       instance_type    = "t3.medium"
     }
   }
