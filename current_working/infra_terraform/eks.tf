@@ -38,7 +38,7 @@ resource "aws_security_group_rule" "allow_all_outbound" {
   from_port         = 0
   to_port           = 65535
   protocol          = "-1"
-  cidr_blocks       = ["10.32.1.0/24", "10.32.2.0/24", "10.32.3.0/24"]
+  cidr_blocks       = ["10.32.4.0/24"]
   
   lifecycle {
     ignore_changes = [cidr_blocks]
