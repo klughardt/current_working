@@ -8,6 +8,7 @@ jobs:
     - checkout
     - run:
         name: refresh and plan
+        working_directory: ~/project/current_working/infra_terraform
         command: |
           terraform init
           terraform refresh

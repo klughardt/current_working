@@ -1,18 +1,20 @@
 version: 2.1
 
 jobs:
-  refresh and plan:
+  deploy:
     docker:
-    - image: amazon/aws-cli
+    - image: hashicorp/terraform:light
     steps:
     - checkout
     - run:
-        name: Terraform refresh and plan
+        name: refresh and plan
+        working_directory: ~/project/current_working/infra_terraform
         command: |
+          terraform init
           terraform refresh
           terraform plan
 
 workflows:
-  refreshplan:
+  deploy:
     jobs:
     - refresh and plan
