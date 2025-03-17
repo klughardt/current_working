@@ -121,16 +121,17 @@ resource "aws_eks_addon" "cloudwatch_observability" {
   depends_on = [module.eks]
 }
 
-# Security Group rule for outbound access from the EKS nodes - overly permissive!
+# All outbound connectivity
 resource "aws_security_group_rule" "allow_all_outbound" {
   type              = "egress"
-  source_security_group_id = module.eks.node_security_group_id
+  security_group_id = module.eks.cluster_primary_security_group_id # <-- Correct reference
 
   from_port         = 0
   to_port           = 65535
   protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
 }
+
 
 # Terraform Outputs
 output "cluster_id" {

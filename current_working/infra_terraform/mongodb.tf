@@ -93,13 +93,13 @@ resource "aws_secretsmanager_secret" "mongosecret" {
   recovery_window_in_days = 0
 }
 
-resource "aws_secretsmanager_secret_version" "mongosecret" {
-  secret_id = aws_secretsmanager_secret.mongosecret.id
-  secret_string = jsonencode({
-    username = var.db_username
-    password = var.db_password
-  })
-}
+#resource "aws_secretsmanager_secret_version" "mongosecret" {
+#  secret_id = aws_secretsmanager_secret.mongosecret.id
+#  secret_string = jsonencode({
+#    username = var.db_username
+#    password = var.db_password
+#  })
+#}
 
 resource "aws_instance" "mongodb" {
   ami           = var.db_ami
