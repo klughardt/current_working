@@ -10,6 +10,7 @@ resource "aws_security_group" "mongodb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # Allow access to MongoDB on port 27017 from EKS nodes
   ingress {
     from_port   = 27017
     to_port     = 27017
@@ -40,18 +41,18 @@ resource "aws_iam_role" "mongodb_role" {
   name = "${var.project_name}-mongodb-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2012-10-17",
     Statement = [
       {
-        Action    = "sts:AssumeRole"
-        Effect    = "Allow"
+        Action    = "sts:AssumeRole",
+        Effect    = "Allow",
         Principal = {
           Service = "ec2.amazonaws.com"
-        }
+        },
         Condition = {
           StringEquals = {
             "aws:SourceAccount": data.aws_caller_identity.current.account_id
-          }
+          },
           StringLike = {
             "aws:SourceArn": "arn:aws:ec2:${var.region}:${data.aws_caller_identity.current.account_id}:*"
           }
@@ -66,26 +67,26 @@ resource "aws_iam_role_policy" "mongodb_policy" {
   role = aws_iam_role.mongodb_role.id
 
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2012-10-17",
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = "ec2:*"
+        Effect   = "Allow",
+        Action   = "ec2:*",
         Resource = "*"
       },
       {
-        Effect = "Allow"
+        Effect = "Allow",
         Action = [
           "s3:PutObject",
           "s3:GetObject"
-        ]
+        ],
         Resource = "${aws_s3_bucket.backup.arn}/*"
       },
       {
-        Effect = "Allow"
+        Effect = "Allow",
         Action = [
           "secretsmanager:GetSecretValue"
-        ]
+        ],
         Resource = data.aws_secretsmanager_secret.mongosecret.arn
       }
     ]
