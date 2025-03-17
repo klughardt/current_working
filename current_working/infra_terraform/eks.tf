@@ -35,6 +35,7 @@ resource "kubernetes_namespace" "tasky" {
   metadata {
     name = "tasky"
   }
+  depends_on = [module.eks] # Ensure EKS is ready first
 }
 
 resource "kubernetes_service_account" "web_app_sa" {
