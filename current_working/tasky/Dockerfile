@@ -8,7 +8,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /go/src/tasky/tasky
 
 # RUN rm -rf /bin/sh /bin/ash
 
-FROM alpine:3.17.0 as release
+FROM alpine:3.18.12 as release
 
 WORKDIR /app
 COPY --from=build  /go/src/tasky/tasky .
